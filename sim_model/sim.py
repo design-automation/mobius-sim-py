@@ -1,5 +1,5 @@
 import json
-import networkx as nx
+from sim_model import graph
 
 # ==================================================================================================
 # Constants
@@ -56,11 +56,24 @@ COLL_ENT_TYPES = [ENT_TYPE.POINTS, ENT_TYPE.PLINES, ENT_TYPE.PGONS, ENT_TYPE.COL
 # NAME OF XYZ ATTRIB NODE_TYPE
 POSIS_ATT_XYZ = 'att_posis_xyz'
 
+# ENT PREFIX
+ENT_PREFIX = {
+    'posis':  'ps',
+    'verts': '_v',
+    'edges': '_e',
+    'wires': '_w',
+    'points': 'pt',
+    'plines': 'pl',
+    'pgons': 'pg',
+    'colls': 'co'
+}
+
 # ==================================================================================================
 # Class for reading and writing Spatial Information Models
 # ==================================================================================================
 
 class SIM():
+
     # ==============================================================================================
     # CONSTRUCTOR
     # ==============================================================================================
@@ -68,33 +81,24 @@ class SIM():
     def __init__(self):
 
        # graph
-        self.graph = nx.DiGraph()
-
-        # graph view entity edges only
-        def ent_filter_edge(n1, n2):
-            return self.graph[n1][n2].get("edge_type") == EDGE_TYPE.ENT
-        self.vw_ent_edges = nx.subgraph_view(self.graph, filter_edge=ent_filter_edge)
-
-        # graph view attrib edges only
-        def attrib_filter_edge(n1, n2):
-            return self.graph[n1][n2].get("edge_type") == EDGE_TYPE.ATTRIB
-        self.vw_attrib_edges = nx.subgraph_view(self.graph, filter_edge=attrib_filter_edge)
+        self.graph = graph.Graph([EDGE_TYPE.ENT,EDGE_TYPE.ATTRIB, EDGE_TYPE.META])
 
         # create meta nodes
-        for ent_type in [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
-            ENT_TYPE.POINTS, ENT_TYPE.PLINES, ENT_TYPE.PGONS, ENT_TYPE.COLLS ]:
+        meta = [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
+            ENT_TYPE.POINTS, ENT_TYPE.PLINES, ENT_TYPE.PGONS, ENT_TYPE.COLLS]
+        for ent_type in meta:
             self.graph.add_node(ent_type, node_type = NODE_TYPE.META)
             self.graph.add_node(ent_type + '_attribs', node_type = NODE_TYPE.META)
             # self.graph.add_node(ent_type + '_attrib_vals', node_type = NODE_TYPE.META)
 
         # add xyz attrib
-        self._graphAddAttrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
+        self._graph_add_attrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
 
     # ==============================================================================================
     # UTILITY 
     # ==============================================================================================
 
-    def _checkType(self, value):
+    def _check_type(self, value):
         val_type = type(value)
         if val_type == int or val_type == float:
             return DATA_TYPE.NUM
@@ -112,94 +116,51 @@ class SIM():
     # PRIVATE GRAPH METHODS
     # ==============================================================================================
 
-    def _graphAddPosi(self):
-        n = 'ps' + str(nx.degree(self.graph, ENT_TYPE.POSIS))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.POSIS)
-        self.graph.add_edge(ENT_TYPE.POSIS, n, edge_type = EDGE_TYPE.META)
+    def _graph_add_ent(self, enty_type):
+        n = ENT_PREFIX[enty_type] + str(self.graph.degree(enty_type, edge_type = EDGE_TYPE.META))
+        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = enty_type)
+        self.graph.add_edge(enty_type, n, edge_type = EDGE_TYPE.META)
         return n
 
-    def _graphAddVert(self):
-        n = '_v' + str(nx.degree(self.graph, ENT_TYPE.VERTS))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.VERTS)
-        self.graph.add_edge(ENT_TYPE.VERTS, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddEdge(self):
-        n = '_e' + str(nx.degree(self.graph, ENT_TYPE.EDGES))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.EDGES)
-        self.graph.add_edge(ENT_TYPE.EDGES, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddWire(self):
-        n = '_w' + str(nx.degree(self.graph, ENT_TYPE.WIRES))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.WIRES)
-        self.graph.add_edge(ENT_TYPE.WIRES, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddPoint(self):
-        n = 'pt' + str(nx.degree(self.graph, ENT_TYPE.POINTS))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.POINTS)
-        self.graph.add_edge(ENT_TYPE.POINTS, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddPline(self):
-        n = 'pl' + str(nx.degree(self.graph, ENT_TYPE.PLINES))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.PLINES)
-        self.graph.add_edge(ENT_TYPE.PLINES, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddPgon(self):
-        n = 'pg' + str(nx.degree(self.graph, ENT_TYPE.PGONS))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.PGONS)
-        self.graph.add_edge(ENT_TYPE.PGONS, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAddColl(self):
-        n = 'co' + str(nx.degree(self.graph, ENT_TYPE.COLLS))
-        self.graph.add_node(n, node_type = NODE_TYPE.ENT, ent_type = ENT_TYPE.COLLS)
-        self.graph.add_edge(ENT_TYPE.COLLS, n, edge_type = EDGE_TYPE.META)
-        return n
-
-    def _graphAttribNodeName(self, ent_type, name):
+    def _graph_attrib_node_name(self, ent_type, name):
         return 'att_' + ent_type + '_' + name
 
-    def _graphAddAttrib(self, ent_type, name, data_type):
-        n = self._graphAttribNodeName( ent_type, name)
+    def _graph_add_attrib(self, ent_type, name, data_type):
+        n = self._graph_attrib_node_name( ent_type, name)
         self.graph.add_node(n, node_type = NODE_TYPE.ATTRIB, ent_type = ent_type,
                 name = name, data_type = data_type)
         self.graph.add_edge(ent_type + '_attribs', n, edge_type = EDGE_TYPE.META)
         return n
 
-    def _graphAttribValNodeName(self, value):
+    def _graph_attrib_val_node_name(self, value):
         return 'val_' + str(value)
 
-    def _graphAddAttribVal(self, value):
-        n = self._graphAttribValNodeName(value)
+    def _graph_add_attrib_val(self, value):
+        n = self._graph_attrib_val_node_name(value)
         self.graph.add_node(n, node_type = NODE_TYPE.ATTRIB_VAL, value = value)
-        self.graph.add_edge(ATTRIB_TYPE.ATTRIB_VALS, n, edge_type = EDGE_TYPE.META)
         return n
 
     # ==============================================================================================
-    # ADD METHODS FOR ENT_TYPE
+    # ADD METHODS FOR ENTITIES
     # ==============================================================================================
 
-    def addPosi(self, xyz: list):
-        posi_n = self._graphAddPosi()
-        self.setEntAttribVal(posi_n, POSIS_ATT_XYZ, xyz)
+    def add_posi(self, xyz: list):
+        posi_n = self._graph_add_ent(ENT_TYPE.POSIS)
+        self.set_attrib_val(posi_n, POSIS_ATT_XYZ, xyz)
         return posi_n
 
-    def addPoint(self, posi_n: str):
-        vert_n = self._graphAddVert()
-        point_n = self._graphAddPoint()
+    def add_point(self, posi_n: str):
+        vert_n = self._graph_add_ent(ENT_TYPE.VERTS)
+        point_n = self._graph_add_ent(ENT_TYPE.POINTS)
         self.graph.add_edge(vert_n, posi_n, edge_type = EDGE_TYPE.ENT)
         self.graph.add_edge(point_n, vert_n, edge_type = EDGE_TYPE.ENT)
         return point_n
 
-    def addPline(self, posis_n: list, closed: bool):
+    def add_pline(self, posis_n: list, closed: bool):
         # vertices
         verts_n = []
         for posi_n in posis_n:
-            vert_n = self._graphAddVert()
+            vert_n = self._graph_add_ent(ENT_TYPE.VERTS)
             self.graph.add_edge(vert_n, posi_n, edge_type = EDGE_TYPE.ENT)
             verts_n.append(vert_n)
         if closed:
@@ -209,25 +170,25 @@ class SIM():
         for i in range(len(verts_n) - 1):
             v0 = verts_n[i]
             v1 = verts_n[i+1]
-            edge_n = self._graphAddEdge()
-            self.graph.add_edge(edge_n, v0, i = 0, edge_type = EDGE_TYPE.ENT)
-            self.graph.add_edge(edge_n, v1, i = 1, edge_type = EDGE_TYPE.ENT)
+            edge_n = self._graph_add_ent(ENT_TYPE.EDGES)
+            self.graph.add_edge(edge_n, v0, edge_type = EDGE_TYPE.ENT)
+            self.graph.add_edge(edge_n, v1, edge_type = EDGE_TYPE.ENT)
             edges_n.append(edge_n)
         # wire
-        wire_n = self._graphAddWire()
+        wire_n = self._graph_add_ent(ENT_TYPE.WIRES)
         for i in range(len(edges_n)):
-            self.graph.add_edge(wire_n, edges_n[i], i = i, edge_type = EDGE_TYPE.ENT)
+            self.graph.add_edge(wire_n, edges_n[i], edge_type = EDGE_TYPE.ENT)
         # pline
-        pline_n = self._graphAddPline()
+        pline_n = self._graph_add_ent(ENT_TYPE.PLINES)
         self.graph.add_edge(pline_n, wire_n, edge_type = EDGE_TYPE.ENT)
         #  return
         return pline_n
 
-    def addPgon(self, posis_n: list):
+    def add_pgon(self, posis_n: list):
         # vertices
         verts_n = []
         for posi_n in posis_n:
-            vert_n = self._graphAddVert()
+            vert_n = self._graph_add_ent(ENT_TYPE.VERTS)
             self.graph.add_edge(vert_n, posi_n, edge_type = EDGE_TYPE.ENT)
             verts_n.append(vert_n)
         verts_n.append(verts_n[0])
@@ -236,24 +197,24 @@ class SIM():
         for i in range(len(verts_n) - 1):
             v0 = verts_n[i]
             v1 = verts_n[i+1]
-            edge_n = self._graphAddEdge()
-            self.graph.add_edge(edge_n, v0, i = 0, edge_type = EDGE_TYPE.ENT)
-            self.graph.add_edge(edge_n, v1, i = 1, edge_type = EDGE_TYPE.ENT)
+            edge_n = self._graph_add_ent(ENT_TYPE.EDGES)
+            self.graph.add_edge(edge_n, v0, edge_type = EDGE_TYPE.ENT)
+            self.graph.add_edge(edge_n, v1, edge_type = EDGE_TYPE.ENT)
             edges_n.append(edge_n)
         # wire
-        wire_n = self._graphAddWire()
+        wire_n = self._graph_add_ent(ENT_TYPE.WIRES)
         for i in range(len(edges_n)):
-            self.graph.add_edge(wire_n, edges_n[i], i = i, edge_type = EDGE_TYPE.ENT)
+            self.graph.add_edge(wire_n, edges_n[i], edge_type = EDGE_TYPE.ENT)
         # pline
-        pgon_n = self._graphAddPgon()
-        self.graph.add_edge(pgon_n, wire_n, i=0, edge_type = EDGE_TYPE.ENT)
+        pgon_n = self._graph_add_ent(ENT_TYPE.PGONS)
+        self.graph.add_edge(pgon_n, wire_n, edge_type = EDGE_TYPE.ENT)
         #  return
         return pgon_n
 
-    def addColl(self):
-        return self._graphAddColl()
+    def add_coll(self):
+        return self._graph_add_ent(ENT_TYPE.COLLS)
 
-    def addCollEnt(self, coll_n, ent_n):
+    def add_coll_ent(self, coll_n, ent_n):
         ent_type = self.graph.nodes[ent_n].get('ent_type')
         if ent_type not in COLL_ENT_TYPES:
             raise Exception('Invalid entitiy for collections.')
@@ -263,84 +224,86 @@ class SIM():
     # ATTRIBUTE METHODS
     # ==============================================================================================
         
-    def getAttrib(self, ent_type, name):
-        att_n = self._graphAttribNodeName(ent_type, name)
+    def get_attrib(self, ent_type, name):
+        att_n = self._graph_attrib_node_name(ent_type, name)
         return att_n
 
-    def addAttrib(self, ent_type, name, data_type):
-        att_n = self._graphAttribNodeName(ent_type, name)
+    def add_attrib(self, ent_type, name, data_type):
+        att_n = self._graph_attrib_node_name(ent_type, name)
         if self.graph.nodes.get(att_n) == None:
-            self._graphAddAttrib(ent_type, name, data_type)
+            self._graph_add_attrib(ent_type, name, data_type)
         elif self.graph.nodes[att_n].get('data_type') != data_type:
             raise Exception('Attribute already exists with different data type')
         return att_n
             
-    def setEntAttribVal(self, ent_n, att_n, value):
+    def set_attrib_val(self, ent_n, att_n, value):
         if self.graph.nodes[ent_n].get('ent_type') != self.graph.nodes[att_n].get('ent_type'):
             raise Exception('Entity and attribute have different types.')
-        data_type = self._checkType(value)
+        data_type = self._check_type(value)
         if self.graph.nodes[att_n].get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(value))
-        att_val_n = self._graphAddAttribVal(value)
+        att_val_n = self._graph_add_attrib_val(value)
         self.graph.add_edge(ent_n, att_val_n, edge_type = EDGE_TYPE.ATTRIB) # ent -> att_val
         self.graph.add_edge(att_val_n, att_n, edge_type = EDGE_TYPE.ATTRIB) # att_val -> att
         
-    def getEntAttribVal(self, ent_n, att_n):
-        att_vals_n = list(self.vw_attrib_edges.successors(ent_n))
+    def get_attrib_val(self, ent_n, att_n):
+        att_vals_n = self.graph.successors(ent_n, EDGE_TYPE.ATTRIB)
         for att_val_n in att_vals_n:
-            atts_n = list(self.vw_attrib_edges.successors(att_val_n))
+            atts_n = self.graph.successors(att_val_n, EDGE_TYPE.ATTRIB)
             if atts_n and atts_n[0] == att_n:
                 return self.graph.nodes[att_val_n].get('value')
         return None
 
-    def setModelAttribVal(self, name, value):
-        self.graph.graph[name] = value
+    def set_model_attrib_val(self, name, value):
+        self.graph.data[name] = value
 
-    def getModelAttribVal(self, name):
-        return self.graph.graph[name]
+    def get_model_attrib_val(self, name):
+        return self.graph.data[name]
 
     # ==============================================================================================
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
 
-    def getEnts(self, ent_type):
-        return list(self.graph.successors(ent_type))
+    def get_ents(self, ent_type):
+        return self.graph.successors(ent_type)
 
-    def numEnts(self, ent_type):
-        return nx.degree(self.graph, ent_type)
-
+    def num_ents(self, ent_type):
+        return self.graph.degree(ent_type)
 
     # ==============================================================================================
     # EXPORT
     # ==============================================================================================
 
     def info(self):
-        nodes = map(lambda n: str(n), self.graph.nodes.data())
+        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.nodes[n]), self.graph.nodes)
         nodes = '\n'.join(nodes)
-        edges = map(lambda n: str(n), self.graph.edges.data())
-        edges = '\n'.join(edges)
-        return 'Nodes: \n' + nodes + '\n' + 'Edges: \n' + edges + '\n\n\n'
+        all_edges = ''
+        for edge_type in self.graph.edge_types:
+            edges = map(lambda e: '- ' + e + ': ' + str(self.graph.edges[edge_type][e]), self.graph.edges[edge_type])
+            edges = '\n'.join(edges)
+            all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
+        return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
 
-    def toStr(self):
-        # entities
-        posi_ents = list(self.graph.successors(ENT_TYPE.POSIS))
-        vert_ents = list(self.graph.successors(ENT_TYPE.VERTS))
-        edge_ents = list(self.graph.successors(ENT_TYPE.EDGES))
-        wire_ents = list(self.graph.successors(ENT_TYPE.WIRES))
-        point_ents = list(self.graph.successors(ENT_TYPE.POINTS))
-        pline_ents = list(self.graph.successors(ENT_TYPE.PLINES))
-        pgon_ents = list(self.graph.successors(ENT_TYPE.PGONS))
-        coll_ents = list(self.graph.successors(ENT_TYPE.COLLS))
-        # attribs
-        posi_attribs = list(self.graph.successors(ATTRIB_TYPE.POSIS_ATTRIBS))
-        vert_attribs = list(self.graph.successors(ATTRIB_TYPE.VERTS_ATTRIBS))
-        edge_attribs = list(self.graph.successors(ATTRIB_TYPE.EDGES_ATTRIBS))
-        wire_attribs = list(self.graph.successors(ATTRIB_TYPE.WIRES_ATTRIBS))
-        point_attribs = list(self.graph.successors(ATTRIB_TYPE.POINTS_ATTRIBS))
-        pline_attribs = list(self.graph.successors(ATTRIB_TYPE.PLINES_ATTRIBS))
-        pgon_attribs = list(self.graph.successors(ATTRIB_TYPE.PGONS_ATTRIBS))
-        coll_attribs = list(self.graph.successors(ATTRIB_TYPE.COLLS_ATTRIBS))
-        # map for entity name -> entity index
+    def json_str(self):
+        # get entities from graph
+        posi_ents = self.graph.successors(ENT_TYPE.POSIS, EDGE_TYPE.META)
+        vert_ents = self.graph.successors(ENT_TYPE.VERTS, EDGE_TYPE.META)
+        edge_ents = self.graph.successors(ENT_TYPE.EDGES, EDGE_TYPE.META)
+        wire_ents = self.graph.successors(ENT_TYPE.WIRES, EDGE_TYPE.META)
+        point_ents = self.graph.successors(ENT_TYPE.POINTS, EDGE_TYPE.META)
+        pline_ents = self.graph.successors(ENT_TYPE.PLINES, EDGE_TYPE.META)
+        pgon_ents = self.graph.successors(ENT_TYPE.PGONS, EDGE_TYPE.META)
+        coll_ents = self.graph.successors(ENT_TYPE.COLLS, EDGE_TYPE.META)
+        # get attribs from graph
+        posi_attribs = self.graph.successors(ATTRIB_TYPE.POSIS_ATTRIBS, EDGE_TYPE.META)
+        vert_attribs = self.graph.successors(ATTRIB_TYPE.VERTS_ATTRIBS, EDGE_TYPE.META)
+        edge_attribs = self.graph.successors(ATTRIB_TYPE.EDGES_ATTRIBS, EDGE_TYPE.META)
+        wire_attribs = self.graph.successors(ATTRIB_TYPE.WIRES_ATTRIBS, EDGE_TYPE.META)
+        point_attribs = self.graph.successors(ATTRIB_TYPE.POINTS_ATTRIBS, EDGE_TYPE.META)
+        pline_attribs = self.graph.successors(ATTRIB_TYPE.PLINES_ATTRIBS, EDGE_TYPE.META)
+        pgon_attribs = self.graph.successors(ATTRIB_TYPE.PGONS_ATTRIBS, EDGE_TYPE.META)
+        coll_attribs = self.graph.successors(ATTRIB_TYPE.COLLS_ATTRIBS, EDGE_TYPE.META)
+        # create maps for entity name -> entity index
         posis_dict = dict( zip(posi_ents, range(len(posi_ents))) )
         verts_dict = dict( zip(vert_ents, range(len(vert_ents))) )
         edges_dict = dict( zip(edge_ents, range(len(edge_ents))) )
@@ -351,24 +314,24 @@ class SIM():
         colls_dict = dict( zip(coll_ents, range(len(coll_ents))) )
         # create the geometry data
         geometry = {
-            'num_posis': nx.degree(self.graph, ENT_TYPE.POSIS),
-            'verts': [posis_dict[list(self.vw_ent_edges.successors(vert_ent))[0]] for vert_ent in vert_ents],
-            'edges': [[verts_dict[vert] for vert in self.vw_ent_edges.successors(edge_ent)] for edge_ent in edge_ents],
-            'wires': [[edges_dict[edge] for edge in self.vw_ent_edges.successors(wire_ent)] for wire_ent in wire_ents],
-            'points': [verts_dict[list(self.vw_ent_edges.successors(point_ent))[0]] for point_ent in point_ents],
-            'plines': [wires_dict[list(self.vw_ent_edges.successors(pline_ent))[0]] for pline_ent in pline_ents],
-            'pgons': [[wires_dict[wire] for wire in self.vw_ent_edges.successors(pgon_ent)] for pgon_ent in pgon_ents],
+            'num_posis': self.graph.degree(ENT_TYPE.POSIS, EDGE_TYPE.META),
+            'verts': [posis_dict[self.graph.successors(vert_ent, EDGE_TYPE.ENT)[0]] for vert_ent in vert_ents],
+            'edges': [[verts_dict[vert] for vert in self.graph.successors(edge_ent, EDGE_TYPE.ENT)] for edge_ent in edge_ents],
+            'wires': [[edges_dict[edge] for edge in self.graph.successors(wire_ent, EDGE_TYPE.ENT)] for wire_ent in wire_ents],
+            'points': [verts_dict[self.graph.successors(point_ent, EDGE_TYPE.ENT)[0]] for point_ent in point_ents],
+            'plines': [wires_dict[self.graph.successors(pline_ent, EDGE_TYPE.ENT)[0]] for pline_ent in pline_ents],
+            'pgons': [[wires_dict[wire] for wire in self.graph.successors(pgon_ent, EDGE_TYPE.ENT)] for pgon_ent in pgon_ents],
             'coll_points': [],
             'coll_plines': [],
             'coll_pgons':  [],
-            'coll_childs': []
+            'coll_colls': []
         }
         for coll_ent in coll_ents:
             geometry['coll_points'].append([])
             geometry['coll_plines'].append([])
             geometry['coll_pgons'].append([])
-            geometry['coll_childs'].append([])
-            for ent in list(self.vw_ent_edges.successors(coll_ent)):
+            geometry['coll_colls'].append([])
+            for ent in self.graph.successors(coll_ent, EDGE_TYPE.ENT):
                 ent_type = self.graph.nodes[ent].get('ent_type')
                 if ent_type == ENT_TYPE.POINTS:
                     geometry['coll_points'][-1].append(points_dict[ent])
@@ -377,19 +340,19 @@ class SIM():
                 elif ent_type == ENT_TYPE.PGONS:
                     geometry['coll_pgons'][-1].append(pgons_dict[ent])
                 elif ent_type == ENT_TYPE.COLLS:
-                    geometry['coll_childs'][-1].append(colls_dict[ent])
+                    geometry['coll_colls'][-1].append(colls_dict[ent])
         # create the attribute data
         def _attribData(attribs, ent_dict):
             data = {}
             for att_n in attribs:
-                att_vals_n = list(self.vw_attrib_edges.predecessors(att_n))
+                att_vals_n = self.graph.predecessors(att_n, EDGE_TYPE.ATTRIB)
                 data['name'] = self.graph.nodes[att_n].get('name')
                 data['data_type'] = self.graph.nodes[att_n].get('data_type')
                 data['data_vals'] = []
                 data['data_ents'] = []
                 for att_val_n in att_vals_n:
                     data['data_vals'].append(self.graph.nodes[att_val_n].get('value'))
-                    idxs = [ent_dict[ent] for ent in list(self.vw_attrib_edges.predecessors(att_val_n))]
+                    idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, EDGE_TYPE.ATTRIB)]
                     data['data_ents'].append(idxs)
             return data
         attributes = {
@@ -400,13 +363,13 @@ class SIM():
             'points': _attribData(point_attribs, points_dict),
             'plines': _attribData(pline_attribs, plines_dict),
             'pgons': _attribData(pgon_attribs, pgons_dict),
-            'colls': _attribData(coll_attribs, colls_dict)
+            'colls': _attribData(coll_attribs, colls_dict),
+            'model': self.graph.data
         }
         # create the json
-        # TODO Modle attributes
         data = {
             'type': 'SIM',
-            'version': '0.9',
+            'version': '0.1',
             'geometry': geometry,
             'attributes': attributes
         }
