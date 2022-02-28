@@ -1,6 +1,6 @@
 from sim_model import sim
-ENT = sim.ENT
-TYPE = sim.TYPE
+ENT_TYPE = sim.ENT_TYPE
+DATA_TYPE = sim.DATA_TYPE
 
 # create a graph
 sm = sim.SIM()
@@ -24,8 +24,8 @@ sm.addCollEnt(coll, pline)
 sm.addCollEnt(coll, pgon)
 
 # create attributes
-attrib_a = sm.addAttrib(ENT.COLLS, "aaa", TYPE.LIST)
-attrib_b = sm.addAttrib(ENT.PGONS, "bbb", TYPE.NUM)
+attrib_a = sm.addAttrib(ENT_TYPE.COLLS, "aaa", DATA_TYPE.LIST)
+attrib_b = sm.addAttrib(ENT_TYPE.PGONS, "bbb", DATA_TYPE.NUM)
 
 # set entity attrib value
 sm.setEntAttribVal(coll, attrib_a, [1,2,3,4,5,6])
@@ -44,3 +44,4 @@ print("Attrib values:", val1, val2, val3)
 
 # print info about the graph
 print(sm.info())
+print(sm.toStr())
