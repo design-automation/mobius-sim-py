@@ -1,5 +1,4 @@
 import json
-from sim_model import graph
 
 # ==================================================================================================
 # Constants
@@ -35,6 +34,9 @@ class DATA_TYPE():
 
 # NODE TYPE
 class _NODE_TYPE():
+    """
+    NODE TYPE
+    """
     ENT = 'entity'
     ATTRIB =  'attrib'
     ATTRIB_VAL =  'attrib_val'

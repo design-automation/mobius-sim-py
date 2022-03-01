@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>SIM Model &#8212; mobius-sim-py  documentation</title>
+    <link rel="stylesheet" href="../_static/material.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Welcome to mobius-sim-py’s documentation!" href="../index.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue-grey data-md-color-accent=blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#sim_model/sim" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../index.html" title="mobius-sim-py  documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">mobius-sim-py  documentation</span>
+          <span class="md-header-nav__topic"> SIM Model </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder="Search"
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+      
+  
+  <script src="../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../"versions.json"",
+        target_loc = "../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">mobius-sim-py  documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../index.html" title="mobius-sim-py documentation" class="md-nav__button md-logo">
+      
+        <img src="../_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../index.html"
+       title="mobius-sim-py documentation">mobius-sim-py  documentation</a>
+  </label>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+  <ul class="md-nav__list" data-md-scrollfix="">
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../_sources/sim_model/sim.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  
+<span id="sim-model"></span><h1 id="sim-model-sim--page-root">SIM Model<a class="headerlink" href="#sim-model-sim--page-root" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="sim_model.sim.DATA_TYPE">
+<em class="property">class </em><code class="sig-prename descclassname">sim_model.sim.</code><code class="sig-name descname">DATA_TYPE</code><a class="headerlink" href="#sim_model.sim.DATA_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class that defines a set of constants for possible data types for attributes. 
+These types are used when adding an attrbute to the model.</p>
+</dd></dl>
+<dl class="class">
+<dt id="sim_model.sim.ENT_TYPE">
+<em class="property">class </em><code class="sig-prename descclassname">sim_model.sim.</code><code class="sig-name descname">ENT_TYPE</code><a class="headerlink" href="#sim_model.sim.ENT_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class that defines a set of constants for different entity types. 
+These types are used when adding an attrbute to the model.</p>
+</dd></dl>
+<dl class="class">
+<dt id="sim_model.sim.SIM">
+<em class="property">class </em><code class="sig-prename descclassname">sim_model.sim.</code><code class="sig-name descname">SIM</code><a class="headerlink" href="#sim_model.sim.SIM" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for creating Spatial Information Models (SIM models).</p>
+<p>The model can contain three types of objects: points, polyline, and polygons.</p>
+<p>Objects are creating by specifing positions, which have XYZ coordinates.</p>
+<p>Objects can be groouped into collections. Collections can contain heterogeneous sets of points,
+polylines, polygons and other collections.</p>
+<p>Objects contain sub-entities that define their topology. The three types of sub-entities are
+vertices, edges, and wires.</p>
+<ul class="simple">
+<li><p>Point objects contain just one vertex.</p></li>
+<li><p>Polyline objects contain vertices, edges, and one wire.</p></li>
+<li><p>Polygon objects cotain vertices, edges and multiple wires. The first wire specifies the 
+polygon boundary. Subsequent wires spcify the polygon holes.</p></li>
+</ul>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_attrib">
+<code class="sig-name descname">add_attrib</code><span class="sig-paren">(</span><em class="sig-param">ent_type: str</em>, <em class="sig-param">att_name: str</em>, <em class="sig-param">att_data_type: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_attrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new attribute in the model, specifying the entity type, the attribute name, and
+the data type. Note that for each entity type, the attribute name must be a unique name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ent_type</strong> – The entity type for the attribute. (See ENT_TYPE)</p></li>
+<li><p><strong>att_name</strong> – The name of the attribute to create.</p></li>
+<li><p><strong>att_data_type</strong> – The data type for the attribute values. (See DATA_TYPE)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_coll">
+<code class="sig-name descname">add_coll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_coll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new empty collection to the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The ID of the collection.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_coll_ent">
+<code class="sig-name descname">add_coll_ent</code><span class="sig-paren">(</span><em class="sig-param">coll: str</em>, <em class="sig-param">ent: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_coll_ent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an entity to an existing collection in the model.
+Collections can contain points, polylines, polygons, and other collections.
+Collections cannot contain positions, vertices, edges or wires.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coll</strong> – The ID of the collection to which the entity will be added.</p></li>
+<li><p><strong>ent</strong> – The ID of the entity to be added to the collection.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_pgon">
+<code class="sig-name descname">add_pgon</code><span class="sig-paren">(</span><em class="sig-param">posis: list</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pgon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a polygon object to the model, specifying a list of positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>posis</strong> – A list of position IDs.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ID of the new polygon.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_pline">
+<code class="sig-name descname">add_pline</code><span class="sig-paren">(</span><em class="sig-param">posis: list</em>, <em class="sig-param">closed: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a polyline object to the model, specifying a list of positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>posis</strong> – A list of position IDs.</p></li>
+<li><p><strong>closed</strong> – A boolean indicating if the polyline is closed or open.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ID of the new polyline.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_point">
+<code class="sig-name descname">add_point</code><span class="sig-paren">(</span><em class="sig-param">posi: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a point object to the model, specifying a single position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>posi</strong> – A position ID.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ID of the new point.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.add_posi">
+<code class="sig-name descname">add_posi</code><span class="sig-paren">(</span><em class="sig-param">xyz: list</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_posi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a position to the model, specifying the XYZ coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xyz</strong> – The XYZ coordinates, a list of three numbers.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ID of the new position.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.get_attrib_val">
+<code class="sig-name descname">get_attrib_val</code><span class="sig-paren">(</span><em class="sig-param">ent: str</em>, <em class="sig-param">name: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_attrib_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an attribute value from an entity in the model, specifying the attribute name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ent</strong> – The ID of the entity for which to get the attribute value.</p></li>
+<li><p><strong>name</strong> – The name of the attribute.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The attribute value or None if no value.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.get_ents">
+<code class="sig-name descname">get_ents</code><span class="sig-paren">(</span><em class="sig-param">ent_type: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_ents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the entities in the model of a specific type. A list of entity IDs is returned.
+If there are no entities of that type in the model, then an empty list is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ent_type</strong> – The type of entity to get from the model.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of entity IDs.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.get_model_attrib_val">
+<code class="sig-name descname">get_model_attrib_val</code><span class="sig-paren">(</span><em class="sig-param">att_name: any</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_model_attrib_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an attribute value from the model, specifying a name. Model attributes are
+top level attributes that apply to the whole model. As such, they are not attached to any
+specific entities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>att_name</strong> – The name of the attribute.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The attribute value or None if no value.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.info">
+<code class="sig-name descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print information about the model. This is mainly used for debugging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A string describing the data in the model.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.json_str">
+<code class="sig-name descname">json_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.json_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a JSON formatted string representing that data in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A JSON string in the SIM format.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.num_ents">
+<code class="sig-name descname">num_ents</code><span class="sig-paren">(</span><em class="sig-param">ent_type: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.num_ents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of entities in the model of a specific type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ent_type</strong> – The type of entity to search for in the model.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A number of entities of the specified type in the model.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.set_attrib_val">
+<code class="sig-name descname">set_attrib_val</code><span class="sig-paren">(</span><em class="sig-param">ent: str</em>, <em class="sig-param">att_name: str</em>, <em class="sig-param">att_value: any</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_attrib_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of an attribute, specifying the entity in the model, the attribute name and
+the attribute value.</p>
+<p>Note that an attribute with the specified name must already exist in 
+the model. If the attribute does not exist, an exception will be thrown. In addition, the 
+attribute value and the data type for the attribute must match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ent</strong> – The ID of the entity.</p></li>
+<li><p><strong>att_name</strong> – The name of the attribute.</p></li>
+<li><p><strong>att_value</strong> – The attribute value to set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="method">
+<dt id="sim_model.sim.SIM.set_model_attrib_val">
+<code class="sig-name descname">set_model_attrib_val</code><span class="sig-paren">(</span><em class="sig-param">att_name: str</em>, <em class="sig-param">att_value: any</em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_model_attrib_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an attribute value from the model, specifying a name and value. Model attributes are
+top level attributes that apply to the whole model. As such, they are not attached to any
+specific entities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>att_name</strong> – The name of the attribute.</p></li>
+<li><p><strong>att_value</strong> – The attribute value to set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="../index.html" title="Welcome to mobius-sim-py’s documentation!"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> Previous </span> Welcome to mobius-sim-py’s documentation! </span>
+              </div>
+            </a>
+          
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2022, Patrick Janssen.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 2.2.0.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>
