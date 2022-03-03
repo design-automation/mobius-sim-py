@@ -2,8 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from future import standard_library
-standard_library.install_aliases()
+from collections import OrderedDict
 from builtins import object
 class Graph(object):
 
@@ -13,13 +12,13 @@ class Graph(object):
 
     def __init__(self, edge_types):
         self.edge_types = edge_types
-        self.nodes = {}
-        self.edges = {}
-        self.edges_rev = {}
-        self.data = {}
+        self.nodes = OrderedDict()
+        self.edges = OrderedDict()
+        self.edges_rev = OrderedDict()
+        self.data = OrderedDict()
         for edge_type in edge_types:
-            self.edges[edge_type] = {}
-            self.edges_rev[edge_type] = {}
+            self.edges[edge_type] = OrderedDict()
+            self.edges_rev[edge_type] = OrderedDict()
 
     # ==============================================================================================
     # METHODS

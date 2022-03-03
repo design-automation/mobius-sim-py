@@ -2,13 +2,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
-from builtins import zip
-from builtins import map
-from builtins import dict
-from builtins import range
-from builtins import str
-from future import standard_library
-standard_library.install_aliases()
+# from builtins import zip
+# from builtins import map
+# from builtins import dict
+# from builtins import range
+# from builtins import str
+from collections import OrderedDict
 import json
 from sim_model import graph
 # ==================================================================================================
@@ -407,7 +406,7 @@ class SIM(object):
         if source_ents == None:
             return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
         source_ents = source_ents if type(source_ents) is list else [source_ents]
-        ents_set = dict() # ordered set
+        ents_set = OrderedDict() # ordered set
         for source_ent in source_ents:
             for target_ent in self._nav(target_ent_type, source_ent):
                 ents_set[target_ent] = None # ordered set
@@ -421,9 +420,9 @@ class SIM(object):
         dir = _ENT_SEQ[source_ent_type] - _ENT_SEQ[target_ent_type]
         navigate = self.graph.successors if dir > 0 else self.graph.predecessors
         ents = [source_ent]
-        target_ents_set = dict()
+        target_ents_set = OrderedDict()
         while ents:
-            ent_set = dict()
+            ent_set = OrderedDict()
             for ent in ents:
                 for target_ent in navigate(ent, _EDGE_TYPE.ENT):
                     this_ent_type = self.graph.nodes[target_ent].get('ent_type')
@@ -579,7 +578,7 @@ class SIM(object):
         def _attribData(attribs, ent_dict):
             attribs_data = []
             for att_n in attribs:
-                data = dict()
+                data = OrderedDict()
                 att_vals_n = self.graph.predecessors(att_n, _EDGE_TYPE.ATTRIB)
                 data['name'] = self.graph.nodes[att_n].get('name')
                 data['data_type'] = self.graph.nodes[att_n].get('data_type')
