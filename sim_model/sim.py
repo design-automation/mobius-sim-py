@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import (
-         bytes, dict, int, list, object, range, str,
+         bytes, dict, int, object, range, str,
          ascii, chr, hex, input, next, oct, open,
          pow, round, super,
          filter, map, zip)
@@ -136,6 +136,7 @@ class SIM():
 
     def _check_type(self, value):
         val_type = type(value)
+        print('...............',val_type, list)
         if val_type == int or val_type == float:
             return DATA_TYPE.NUM
         if val_type == str:
@@ -402,7 +403,7 @@ class SIM():
         if source_ents == None:
             return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
         source_ents = source_ents if type(source_ents) is list else [source_ents]
-        ents_set = {} # ordered set
+        ents_set = dict() # ordered set
         for source_ent in source_ents:
             for target_ent in self._nav(target_ent_type, source_ent):
                 ents_set[target_ent] = None # ordered set
@@ -416,9 +417,9 @@ class SIM():
         dir = _ENT_SEQ[source_ent_type] - _ENT_SEQ[target_ent_type]
         navigate = self.graph.successors if dir > 0 else self.graph.predecessors
         ents = [source_ent]
-        target_ents_set = {}
+        target_ents_set = dict()
         while ents:
-            ent_set = {}
+            ent_set = dict()
             for ent in ents:
                 for target_ent in navigate(ent, _EDGE_TYPE.ENT):
                     this_ent_type = self.graph.nodes[target_ent].get('ent_type')
@@ -574,7 +575,7 @@ class SIM():
         def _attribData(attribs, ent_dict):
             attribs_data = []
             for att_n in attribs:
-                data = {}
+                data = dict()
                 att_vals_n = self.graph.predecessors(att_n, _EDGE_TYPE.ATTRIB)
                 data['name'] = self.graph.nodes[att_n].get('name')
                 data['data_type'] = self.graph.nodes[att_n].get('data_type')
