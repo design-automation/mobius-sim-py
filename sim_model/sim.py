@@ -139,7 +139,6 @@ class SIM(object):
 
     def _check_type(self, value):
         val_type = type(value)
-        print('...............',val_type, list)
         if val_type == int or val_type == float:
             return DATA_TYPE.NUM
         if val_type == str:
