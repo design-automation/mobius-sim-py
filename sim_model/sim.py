@@ -127,7 +127,7 @@ class SIM():
     # UTILITY 
     # ==============================================================================================
 
-    def _check_type(self, value: any):
+    def _check_type(self, value):
         val_type = type(value)
         if val_type == int or val_type == float:
             return DATA_TYPE.NUM
@@ -145,26 +145,26 @@ class SIM():
     # PRIVATE GRAPH METHODS
     # ==============================================================================================
 
-    def _graph_add_ent(self, enty_type: str):
+    def _graph_add_ent(self, enty_type):
         n = _ENT_PREFIX[enty_type] + str(self.graph.degree(enty_type, edge_type = _EDGE_TYPE.META))
         self.graph.add_node(n, node_type = _NODE_TYPE.ENT, ent_type = enty_type)
         self.graph.add_edge(enty_type, n, edge_type = _EDGE_TYPE.META)
         return n
 
-    def _graph_attrib_node_name(self, ent_type: str, name: str):
+    def _graph_attrib_node_name(self, ent_type, name):
         return 'att_' + ent_type + '_' + name
 
-    def _graph_add_attrib(self, ent_type: str, name: str, data_type: str):
+    def _graph_add_attrib(self, ent_type, name, data_type):
         n = self._graph_attrib_node_name(ent_type, name)
         self.graph.add_node(n, node_type = _NODE_TYPE.ATTRIB, ent_type = ent_type,
             name = name, data_type = data_type)
         self.graph.add_edge(ent_type + '_attribs', n, edge_type = _EDGE_TYPE.META)
         return n
 
-    def _graph_attrib_val_node_name(self, value: any):
+    def _graph_attrib_val_node_name(self, value):
         return 'val_' + str(value)
 
-    def _graph_add_attrib_val(self, value: any):
+    def _graph_add_attrib_val(self, value):
         n = self._graph_attrib_val_node_name(value)
         self.graph.add_node(n, node_type = _NODE_TYPE.ATTRIB_VAL, value = value)
         return n
@@ -173,7 +173,7 @@ class SIM():
     # ADD METHODS FOR ENTITIES
     # ==============================================================================================
 
-    def add_posi(self, xyz: list):
+    def add_posi(self, xyz):
         """Add a position to the model, specifying the XYZ coordinates.
 
         :param xyz: The XYZ coordinates, a list of three numbers.
@@ -183,7 +183,7 @@ class SIM():
         self.set_attrib_val(posi_n, "xyz", xyz)
         return posi_n
 
-    def add_point(self, posi: str):
+    def add_point(self, posi):
         """Add a point object to the model, specifying a single position.
 
         :param posi: A position ID.
@@ -195,7 +195,7 @@ class SIM():
         self.graph.add_edge(point_n, vert_n, edge_type = _EDGE_TYPE.ENT)
         return point_n
 
-    def add_pline(self, posis: list, closed: bool):
+    def add_pline(self, posis, closed):
         """Add a polyline object to the model, specifying a list of positions.
 
         :param posis: A list of position IDs.
@@ -230,7 +230,7 @@ class SIM():
         #  return
         return pline_n
 
-    def add_pgon(self, posis: list):
+    def add_pgon(self, posis):
         """Add a polygon object to the model, specifying a list of positions.
 
         :param posis: A list of position IDs.
@@ -269,7 +269,7 @@ class SIM():
         """
         return self._graph_add_ent(ENT_TYPE.COLLS)
 
-    def add_coll_ent(self, coll: str, ent: str):
+    def add_coll_ent(self, coll, ent):
         """Add an entity to an existing collection in the model.
         Collections can contain points, polylines, polygons, and other collections.
         Collections cannot contain positions, vertices, edges or wires.
@@ -287,7 +287,7 @@ class SIM():
     # ATTRIBUTE METHODS
     # ==============================================================================================
         
-    def add_attrib(self, ent_type: str, att_name: str, att_data_type: str):
+    def add_attrib(self, ent_type, att_name, att_data_type):
         """Create a new attribute in the model, specifying the entity type, the attribute name, and
         the data type. Note that for each entity type, the attribute name must be a unique name.
 
@@ -302,7 +302,7 @@ class SIM():
         elif self.graph.nodes[att_n].get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
             
-    def set_attrib_val(self, ent: str, att_name: str, att_value: any):
+    def set_attrib_val(self, ent, att_name, att_value):
         """Set the value of an attribute, specifying the entity in the model, the attribute name and
         the attribute value. 
         
@@ -326,7 +326,7 @@ class SIM():
         self.graph.add_edge(ent, att_val_n, edge_type = _EDGE_TYPE.ATTRIB) # ent -> att_val
         self.graph.add_edge(att_val_n, att_n, edge_type = _EDGE_TYPE.ATTRIB) # att_val -> att
         
-    def get_attrib_val(self, ent: str, name: str):
+    def get_attrib_val(self, ent, name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
 
         :param ent: The ID of the entity for which to get the attribute value.
@@ -343,7 +343,7 @@ class SIM():
                 return self.graph.nodes[att_val_n].get('value')
         return None
 
-    def set_model_attrib_val(self, att_name: str, att_value: any):
+    def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
         specific entities.
@@ -354,7 +354,7 @@ class SIM():
         """
         self.graph.data[att_name] = att_value
 
-    def get_model_attrib_val(self, att_name: any):
+    def get_model_attrib_val(self, att_name):
         """Get an attribute value from the model, specifying a name. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
         specific entities.
@@ -368,7 +368,7 @@ class SIM():
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
 
-    def num_ents(self, ent_type: str):
+    def num_ents(self, ent_type):
         """Get the number of entities in the model of a specific type.  
 
         :param ent_type: The type of entity to search for in the model.
@@ -376,7 +376,7 @@ class SIM():
         """
         return self.graph.degree(ent_type)
 
-    def get_ents(self, target_ent_type: str, source_ents = None):
+    def get_ents(self, target_ent_type, source_ents = None):
         """Get entities of a specific type. A list of entity IDs is returned.
 
         If source_ents is None, then all entities of the specified type in the model are returned.
@@ -401,7 +401,7 @@ class SIM():
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
 
-    def _nav(self, target_ent_type: str, source_ent: str):
+    def _nav(self, target_ent_type, source_ent):
         # TODO this method could be optimised
         source_ent_type = self.graph.nodes[source_ent].get('ent_type')
         if source_ent_type == target_ent_type:
@@ -467,7 +467,7 @@ class SIM():
     # QUERY
     # ==============================================================================================
 
-    def pline_is_closed(self, pline:str):
+    def pline_is_closed(self, pline):
         """Check if a polyline is open or closed.
 
         :param pline: A polyline ID.
