@@ -11,7 +11,7 @@ point = sm.add_point(posi)
 # create a pline
 pline = sm.add_pline(
     [posi, sm.add_posi([4,5,7]), sm.add_posi([2,2,2])],
-    True
+    True # closed
 )
 # create  pgon
 pgon = sm.add_pgon(
@@ -39,9 +39,21 @@ val2 = sm.get_attrib_val(pgon, "bbb")
 sm.set_model_attrib_val("ccc", "This is a test")
 val3 = sm.get_model_attrib_val("ccc")
 
+# get the positions from the pgon
+val4 = sm.get_ents(ENT_TYPE.POSIS)
+val5 = sm.get_ents(ENT_TYPE.VERTS, pgon)
+val6 = sm.get_ents(ENT_TYPE.POSIS, pline)
+val7 = sm.get_ents(ENT_TYPE.COLLS, posi)
+
+# print("RESULT", val6)
+
 # ptint attrib vals
-print("Attrib values:", val1, val2, val3)
+print("Attrib values:", val1, val2, val3, val4, val5, val6, val7)
 
 # print info about the graph
 print(sm.info())
-print(sm.json_str())
+
+json = sm.json_str()
+with open("test.sim", "w") as f:
+    f.write(json)
+print(json)

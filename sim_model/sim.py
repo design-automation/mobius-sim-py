@@ -1,5 +1,5 @@
 import json
-
+from sim_model import graph
 # ==================================================================================================
 # Constants
 # ==================================================================================================
@@ -34,9 +34,6 @@ class DATA_TYPE():
 
 # NODE TYPE
 class _NODE_TYPE():
-    """
-    NODE TYPE
-    """
     ENT = 'entity'
     ATTRIB =  'attrib'
     ATTRIB_VAL =  'attrib_val'
@@ -54,7 +51,7 @@ _COLL_ENT_TYPES = [
     ENT_TYPE.PLINES, 
     ENT_TYPE.PGONS, 
     ENT_TYPE.COLLS
-]
+];
 
 # ENT PREFIX
 _ENT_PREFIX = {
@@ -66,7 +63,18 @@ _ENT_PREFIX = {
     'plines': 'pl',
     'pgons': 'pg',
     'colls': 'co'
-}
+};
+
+_ENT_SEQ = {
+    ENT_TYPE.POSIS: 0,
+    ENT_TYPE.VERTS: 1,
+    ENT_TYPE.EDGES: 2,
+    ENT_TYPE.WIRES: 3,
+    ENT_TYPE.POINTS: 10,
+    ENT_TYPE.PLINES: 20,
+    ENT_TYPE.PGONS: 30,
+    ENT_TYPE.COLLS: 40
+};
 
 # ==================================================================================================
 # Class for reading and writing Spatial Information Models
@@ -83,8 +91,8 @@ class SIM():
     Objects can be groouped into collections. Collections can contain heterogeneous sets of points,
     polylines, polygons and other collections.
 
-    Objects contain sub-entities that define their topology. The three types of sub-entities are
-    vertices, edges, and wires.
+    Objects have sub-entities that define their topology. The three types of sub-entities are
+    vertices, edges, and wires. Attributes can also be attached to these sub-emtities. 
 
     - Point objects contain just one vertex.
     - Polyline objects contain vertices, edges, and one wire.
@@ -101,7 +109,9 @@ class SIM():
         """
 
        # graph
-        self.graph = graph.Graph([_EDGE_TYPE.ENT,_EDGE_TYPE.ATTRIB, _EDGE_TYPE.META])
+        self.graph = graph.Graph([
+            _EDGE_TYPE.ENT, _EDGE_TYPE.ATTRIB, _EDGE_TYPE.META
+        ])
 
         # create meta nodes
         meta = [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
@@ -109,7 +119,6 @@ class SIM():
         for ent_type in meta:
             self.graph.add_node(ent_type, node_type = _NODE_TYPE.META)
             self.graph.add_node(ent_type + '_attribs', node_type = _NODE_TYPE.META)
-            # self.graph.add_node(ent_type + '_attrib_vals', node_type = _NODE_TYPE.META)
 
         # add xyz attrib
         self._graph_add_attrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
@@ -193,14 +202,14 @@ class SIM():
         :param closed: A boolean indicating if the polyline is closed or open.
         :return: The ID of the new polyline.
         """
+        if closed:
+            posis.append(posis[0])
         # vertices
         verts_n = []
         for posi_n in posis:
             vert_n = self._graph_add_ent(ENT_TYPE.VERTS)
             self.graph.add_edge(vert_n, posi_n, edge_type = _EDGE_TYPE.ENT)
             verts_n.append(vert_n)
-        if closed:
-            verts_n.append(verts_n[0])
         # edges
         edges_n = []
         for i in range(len(verts_n) - 1):
@@ -358,15 +367,6 @@ class SIM():
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
 
-    def get_ents(self, ent_type: str):
-        """Get all the entities in the model of a specific type. A list of entity IDs is returned.
-        If there are no entities of that type in the model, then an empty list is returned. 
-
-        :param ent_type: The type of entity to get from the model.
-        :return: A list of entity IDs.
-        """
-        return self.graph.successors(ent_type)
-
     def num_ents(self, ent_type: str):
         """Get the number of entities in the model of a specific type.  
 
@@ -374,6 +374,87 @@ class SIM():
         :return: A number of entities of the specified type in the model.
         """
         return self.graph.degree(ent_type)
+
+    def get_ents(self, target_ent_type: str, source_ents = None):
+        """Get entities of a specific type. A list of entity IDs is returned.
+
+        If source_ents is None, then all entities of the specified type in the model are returned.
+        If there are no entities of that type in the model, then an empty list is returned. 
+
+        If source_ents contains a list of entities, then entities will be extracted from the source
+        ents. For example, if ent_type is 'posis' and 'source_ents' is a polyline and a polygon,
+        then a list containing the positions used in the polyline and polygon are returned. 
+        Similarly, if ent_type is 'pgons' and 'source_ents' is a list of positions,
+        then a list of polygons is returned, of polygons that make use of the specified positions.
+
+        :param target_ent_type: The type of entity to get from the model.
+        :param source_ents: None, or a single entity ID or a list of entity IDs from which to get 
+        the target entities.
+        :return: A list of unique entity IDs.
+        """
+        if source_ents == None:
+            return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
+        source_ents = source_ents if type(source_ents) is list else [source_ents]
+        ents_set = {} # ordered set
+        for source_ent in source_ents:
+            for target_ent in self._nav(target_ent_type, source_ent):
+                ents_set[target_ent] = None # ordered set
+        return list(ents_set.keys())
+
+    def _nav(self, target_ent_type: str, source_ent: str):
+        # TODO this method could be optimised
+        source_ent_type = self.graph.nodes[source_ent].get('ent_type')
+        if source_ent_type == target_ent_type:
+            return ents
+        dir = _ENT_SEQ[source_ent_type] - _ENT_SEQ[target_ent_type]
+        navigate = self.graph.successors if dir > 0 else self.graph.predecessors
+        ents = [source_ent]
+        target_ents_set = {}
+        while ents:
+            ent_set = {}
+            for ent in ents:
+                for target_ent in navigate(ent, _EDGE_TYPE.ENT):
+                    this_ent_type = self.graph.nodes[target_ent].get('ent_type')
+                    if this_ent_type == target_ent_type:
+                        target_ents_set[target_ent] = None # orderd set
+                    else:
+                        # TODO we may have passed the target already
+                        ent_set[target_ent] = None # orderd set
+            ents = ent_set.keys()
+        return target_ents_set.keys()
+
+    def get_point_posi(self, point):
+        """Get the position ID for a point.
+
+        :param point: A point ID from which to get the position.
+        :return: A position ID. 
+        """
+        vert = self.get_ents(ENT_TYPE.VERTS, point)[0]
+        return self.graph.successors(vert, _EDGE_TYPE.ENT)[0]
+
+    def get_pline_posis(self, pline):
+        """Get a list of position IDs for a polyline. If the polyline is closed, the first and last
+        positions will be the same.
+
+        :param pline: A polyline ID from which to get the positions.
+        :return: A list of position IDs. The list may contain duplicates.
+        """
+        verts = self.get_ents(ENT_TYPE.VERTS, pline)
+        return [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
+
+    def get_pgon_posis(self, pgon):
+        """Get a list of lists of position IDs for an polygon. Each list represents one of the
+        polygon wires. All wires are assumed to be closed. (The last position is not duplicated.)
+
+        :param pgon: A polygon ID from which to get the positions.
+        :return: A list of lists of position IDs. The lists may contain duplicates.
+        """
+        posis = []
+        for wire in self.get_ents(ENT_TYPE.WIRES, pgon):
+            verts = self.get_ents(ENT_TYPE.VERTS, wire)
+            wire_posis = [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
+            posis.append(wire_posis)
+        return posis
 
     # ==============================================================================================
     # EXPORT
@@ -407,15 +488,6 @@ class SIM():
         pline_ents = self.graph.successors(ENT_TYPE.PLINES, _EDGE_TYPE.META)
         pgon_ents = self.graph.successors(ENT_TYPE.PGONS, _EDGE_TYPE.META)
         coll_ents = self.graph.successors(ENT_TYPE.COLLS, _EDGE_TYPE.META)
-        # get attribs from graph
-        posi_attribs = self.graph.successors(ENT_TYPE.POSIS + '_attribs', _EDGE_TYPE.META)
-        vert_attribs = self.graph.successors(ENT_TYPE.VERTS + '_attribs', _EDGE_TYPE.META)
-        edge_attribs = self.graph.successors(ENT_TYPE.EDGES + '_attribs', _EDGE_TYPE.META)
-        wire_attribs = self.graph.successors(ENT_TYPE.WIRES + '_attribs', _EDGE_TYPE.META)
-        point_attribs = self.graph.successors(ENT_TYPE.POINTS + '_attribs', _EDGE_TYPE.META)
-        pline_attribs = self.graph.successors(ENT_TYPE.PLINES + '_attribs', _EDGE_TYPE.META)
-        pgon_attribs = self.graph.successors(ENT_TYPE.PGONS + '_attribs', _EDGE_TYPE.META)
-        coll_attribs = self.graph.successors(ENT_TYPE.COLLS + '_attribs', _EDGE_TYPE.META)
         # create maps for entity name -> entity index
         posis_dict = dict( zip(posi_ents, range(len(posi_ents))) )
         verts_dict = dict( zip(vert_ents, range(len(vert_ents))) )
@@ -428,17 +500,23 @@ class SIM():
         # create the geometry data
         geometry = {
             'num_posis': self.graph.degree(ENT_TYPE.POSIS, _EDGE_TYPE.META),
-            'verts': [posis_dict[self.graph.successors(vert_ent, _EDGE_TYPE.ENT)[0]] for vert_ent in vert_ents],
-            'edges': [[verts_dict[vert] for vert in self.graph.successors(edge_ent, _EDGE_TYPE.ENT)] for edge_ent in edge_ents],
-            'wires': [[edges_dict[edge] for edge in self.graph.successors(wire_ent, _EDGE_TYPE.ENT)] for wire_ent in wire_ents],
-            'points': [verts_dict[self.graph.successors(point_ent, _EDGE_TYPE.ENT)[0]] for point_ent in point_ents],
-            'plines': [wires_dict[self.graph.successors(pline_ent, _EDGE_TYPE.ENT)[0]] for pline_ent in pline_ents],
-            'pgons': [[wires_dict[wire] for wire in self.graph.successors(pgon_ent, _EDGE_TYPE.ENT)] for pgon_ent in pgon_ents],
+            'points': [],
+            'plines': [],
+            'pgons': [],
             'coll_points': [],
             'coll_plines': [],
             'coll_pgons':  [],
             'coll_colls': []
         }
+        for point_ent in point_ents:
+            posi_i = self.get_point_posi(point_ent)
+            geometry['points'].append(posis_dict[posi_i])
+        for pline_ent in pline_ents:
+            posis_i = self.get_pline_posis(pline_ent)
+            geometry['plines'].append([posis_dict[posi_i] for posi_i in posis_i])
+        for pgon_ent in pgon_ents:
+            wires_posis_i = self.get_pgon_posis(pgon_ent)
+            geometry['pgons'].append([[posis_dict[posi_i] for posi_i in posis_i] for posis_i in wires_posis_i])
         for coll_ent in coll_ents:
             geometry['coll_points'].append([])
             geometry['coll_plines'].append([])
@@ -454,6 +532,15 @@ class SIM():
                     geometry['coll_pgons'][-1].append(pgons_dict[ent])
                 elif ent_type == ENT_TYPE.COLLS:
                     geometry['coll_colls'][-1].append(colls_dict[ent])
+        # get attribs from graph
+        posi_attribs = self.graph.successors(ENT_TYPE.POSIS + '_attribs', _EDGE_TYPE.META)
+        vert_attribs = self.graph.successors(ENT_TYPE.VERTS + '_attribs', _EDGE_TYPE.META)
+        edge_attribs = self.graph.successors(ENT_TYPE.EDGES + '_attribs', _EDGE_TYPE.META)
+        wire_attribs = self.graph.successors(ENT_TYPE.WIRES + '_attribs', _EDGE_TYPE.META)
+        point_attribs = self.graph.successors(ENT_TYPE.POINTS + '_attribs', _EDGE_TYPE.META)
+        pline_attribs = self.graph.successors(ENT_TYPE.PLINES + '_attribs', _EDGE_TYPE.META)
+        pgon_attribs = self.graph.successors(ENT_TYPE.PGONS + '_attribs', _EDGE_TYPE.META)
+        coll_attribs = self.graph.successors(ENT_TYPE.COLLS + '_attribs', _EDGE_TYPE.META)
         # create the attribute data
         def _attribData(attribs, ent_dict):
             data = {}
