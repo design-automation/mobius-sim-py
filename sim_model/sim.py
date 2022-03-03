@@ -1,3 +1,10 @@
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import (
+         bytes, dict, int, list, object, range, str,
+         ascii, chr, hex, input, next, oct, open,
+         pow, round, super,
+         filter, map, zip)
 import json
 from sim_model import graph
 # ==================================================================================================
@@ -51,7 +58,7 @@ _COLL_ENT_TYPES = [
     ENT_TYPE.PLINES, 
     ENT_TYPE.PGONS, 
     ENT_TYPE.COLLS
-];
+]
 
 # ENT PREFIX
 _ENT_PREFIX = {
@@ -63,7 +70,7 @@ _ENT_PREFIX = {
     'plines': 'pl',
     'pgons': 'pg',
     'colls': 'co'
-};
+}
 
 _ENT_SEQ = {
     ENT_TYPE.POSIS: 0,
@@ -74,7 +81,7 @@ _ENT_SEQ = {
     ENT_TYPE.PLINES: 20,
     ENT_TYPE.PGONS: 30,
     ENT_TYPE.COLLS: 40
-};
+}
 
 # ==================================================================================================
 # Class for reading and writing Spatial Information Models
