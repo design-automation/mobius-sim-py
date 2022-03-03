@@ -571,12 +571,12 @@ class SIM():
                 att_vals_n = self.graph.predecessors(att_n, _EDGE_TYPE.ATTRIB)
                 data['name'] = self.graph.nodes[att_n].get('name')
                 data['data_type'] = self.graph.nodes[att_n].get('data_type')
-                data['data_vals'] = []
-                data['data_ents'] = []
+                data['values'] = []
+                data['entities'] = []
                 for att_val_n in att_vals_n:
-                    data['data_vals'].append(self.graph.nodes[att_val_n].get('value'))
+                    data['values'].append(self.graph.nodes[att_val_n].get('value'))
                     idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
-                    data['data_ents'].append(idxs)
+                    data['entities'].append(idxs)
                 attribs_data.append(data)
             return attribs_data
         attributes = {

@@ -10,8 +10,6 @@ if "%SPHINXBUILD%" == "" (
 set SOURCEDIR=docsconfig
 set BUILDDIR=docs
 
-if "%1" == "" goto help
-
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
 	echo.
@@ -25,13 +23,7 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-%SPHINXBUILD% -M clean %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
-
-if %1 EQU clean (
-    goto end
-)
-
-%SPHINXBUILD% -b %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+%SPHINXBUILD% -b html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :help

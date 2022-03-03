@@ -6,4 +6,4 @@ Documentation
 
 To generate the documentation:
 - Install Sphinx: `choco install sphinx`
-- Execute `make_docs html`
+- Execute `make_docs`
