@@ -202,8 +202,6 @@ class SIM():
         :param closed: A boolean indicating if the polyline is closed or open.
         :return: The ID of the new polyline.
         """
-        if closed:
-            posis.append(posis[0])
         # vertices
         verts_n = []
         for posi_n in posis:
@@ -213,11 +211,14 @@ class SIM():
         # edges
         edges_n = []
         for i in range(len(verts_n) - 1):
-            v0 = verts_n[i]
-            v1 = verts_n[i+1]
             edge_n = self._graph_add_ent(ENT_TYPE.EDGES)
-            self.graph.add_edge(edge_n, v0, edge_type = _EDGE_TYPE.ENT)
-            self.graph.add_edge(edge_n, v1, edge_type = _EDGE_TYPE.ENT)
+            self.graph.add_edge(edge_n, verts_n[i], edge_type = _EDGE_TYPE.ENT)
+            self.graph.add_edge(edge_n, verts_n[i+1], edge_type = _EDGE_TYPE.ENT)
+            edges_n.append(edge_n)
+        if closed:
+            edge_n = self._graph_add_ent(ENT_TYPE.EDGES)
+            self.graph.add_edge(edge_n, verts_n[-1], edge_type = _EDGE_TYPE.ENT)
+            self.graph.add_edge(edge_n, verts_n[0], edge_type = _EDGE_TYPE.ENT)
             edges_n.append(edge_n)
         # wire
         wire_n = self._graph_add_ent(ENT_TYPE.WIRES)
@@ -388,8 +389,7 @@ class SIM():
         then a list of polygons is returned, of polygons that make use of the specified positions.
 
         :param target_ent_type: The type of entity to get from the model.
-        :param source_ents: None, or a single entity ID or a list of entity IDs from which to get 
-        the target entities.
+        :param source_ents: None, or a single entity ID or a list of entity IDs from which to get the target entities.
         :return: A list of unique entity IDs.
         """
         if source_ents == None:
@@ -439,8 +439,14 @@ class SIM():
         :param pline: A polyline ID from which to get the positions.
         :return: A list of position IDs. The list may contain duplicates.
         """
-        verts = self.get_ents(ENT_TYPE.VERTS, pline)
-        return [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
+
+        edges = self.get_ents(ENT_TYPE.EDGES, pline)
+        verts = [self.graph.successors(edge, _EDGE_TYPE.ENT)[0] for edge in edges]
+        posis = [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
+        last_vert = self.graph.successors(edges[-1], _EDGE_TYPE.ENT)[1]
+        last_posi = self.graph.successors(last_vert, _EDGE_TYPE.ENT)[0]
+        posis.append(last_posi)
+        return posis
 
     def get_pgon_posis(self, pgon):
         """Get a list of lists of position IDs for an polygon. Each list represents one of the
@@ -455,6 +461,22 @@ class SIM():
             wire_posis = [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
             posis.append(wire_posis)
         return posis
+
+
+    # ==============================================================================================
+    # QUERY
+    # ==============================================================================================
+
+    def pline_is_closed(self, pline:str):
+        """Check if a polyline is open or closed.
+
+        :param pline: A polyline ID.
+        :return: True if closed, False if open.
+        """
+        edges = self.graph.successors(self.graph.successors(pline, _EDGE_TYPE.ENT)[0], _EDGE_TYPE.ENT)
+        start = self.graph.successors(self.graph.successors(edges[0], _EDGE_TYPE.ENT)[0], _EDGE_TYPE.ENT)
+        end = self.graph.successors(self.graph.successors(edges[-1], _EDGE_TYPE.ENT)[1], _EDGE_TYPE.ENT)
+        return start == end
 
     # ==============================================================================================
     # EXPORT
@@ -543,8 +565,9 @@ class SIM():
         coll_attribs = self.graph.successors(ENT_TYPE.COLLS + '_attribs', _EDGE_TYPE.META)
         # create the attribute data
         def _attribData(attribs, ent_dict):
-            data = {}
+            attribs_data = []
             for att_n in attribs:
+                data = {}
                 att_vals_n = self.graph.predecessors(att_n, _EDGE_TYPE.ATTRIB)
                 data['name'] = self.graph.nodes[att_n].get('name')
                 data['data_type'] = self.graph.nodes[att_n].get('data_type')
@@ -554,7 +577,8 @@ class SIM():
                     data['data_vals'].append(self.graph.nodes[att_val_n].get('value'))
                     idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
                     data['data_ents'].append(idxs)
-            return data
+                attribs_data.append(data)
+            return attribs_data
         attributes = {
             'posis': _attribData(posi_attribs, posis_dict),
             'verts': _attribData(vert_attribs, verts_dict),
@@ -564,7 +588,7 @@ class SIM():
             'plines': _attribData(pline_attribs, plines_dict),
             'pgons': _attribData(pgon_attribs, pgons_dict),
             'colls': _attribData(coll_attribs, colls_dict),
-            'model': self.graph.data
+            'model': list(self.graph.data.items())
         }
         # create the json
         data = {

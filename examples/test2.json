@@ -1,0 +1,57 @@
+{
+    "type": "SIM",
+    "version": "0.1",
+    "geometry": {
+        "num_posis": 5,
+        "points": [
+            0
+        ],
+        "plines": [
+            [
+                0,
+                1,
+                2
+            ]
+        ],
+        "pgons": [
+            [
+                [
+                    0,
+                    3,
+                    4
+                ]
+            ]
+        ],
+        "coll_points": [
+            [
+                0
+            ]
+        ],
+        "coll_plines": [
+            [
+                0
+            ]
+        ],
+        "coll_pgons": [
+            [
+                0
+            ]
+        ],
+        "coll_colls": [
+            []
+        ]
+    },
+    "attributes": {
+        "posis": [],
+        "verts": [],
+        "edges": [],
+        "wires": [],
+        "points": [],
+        "plines": [],
+        "pgons": [],
+        "colls": [],
+        "model": {
+            "ccc": "This is a test"
+        }
+    }
+}

@@ -1,0 +1,133 @@
+{
+    "type": "SIM",
+    "version": "0.1",
+    "geometry": {
+        "num_posis": 5,
+        "points": [
+            0
+        ],
+        "plines": [
+            [
+                0,
+                1,
+                2
+            ]
+        ],
+        "pgons": [
+            [
+                [
+                    0,
+                    3,
+                    4
+                ]
+            ]
+        ],
+        "coll_points": [
+            [
+                0
+            ]
+        ],
+        "coll_plines": [
+            [
+                0
+            ]
+        ],
+        "coll_pgons": [
+            [
+                0
+            ]
+        ],
+        "coll_colls": [
+            []
+        ]
+    },
+    "attributes": {
+        "posis": {
+            "name": "xyz",
+            "data_type": "list",
+            "data_vals": [
+                [
+                    1,
+                    2,
+                    3
+                ],
+                [
+                    4,
+                    5,
+                    7
+                ],
+                [
+                    2,
+                    2,
+                    2
+                ],
+                [
+                    2,
+                    3,
+                    4
+                ],
+                [
+                    8,
+                    5,
+                    0
+                ]
+            ],
+            "data_ents": [
+                [
+                    0
+                ],
+                [
+                    1
+                ],
+                [
+                    2
+                ],
+                [
+                    3
+                ],
+                [
+                    4
+                ]
+            ]
+        },
+        "verts": {},
+        "edges": {},
+        "wires": {},
+        "points": {},
+        "plines": {},
+        "pgons": {
+            "name": "bbb",
+            "data_type": "number",
+            "data_vals": [
+                1.2345
+            ],
+            "data_ents": [
+                [
+                    0
+                ]
+            ]
+        },
+        "colls": {
+            "name": "aaa",
+            "data_type": "list",
+            "data_vals": [
+                [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                ]
+            ],
+            "data_ents": [
+                [
+                    0
+                ]
+            ]
+        },
+        "model": {
+            "ccc": "This is a test"
+        }
+    }
+}
