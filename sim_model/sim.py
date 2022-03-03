@@ -1,10 +1,14 @@
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import (
-         bytes, dict, int, object, range, str,
-         ascii, chr, hex, input, next, oct, open,
-         pow, round, super,
-         filter, map, zip)
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import map
+from builtins import dict
+from builtins import range
+from builtins import str
+from future import standard_library
+standard_library.install_aliases()
 import json
 from sim_model import graph
 # ==================================================================================================
@@ -12,7 +16,7 @@ from sim_model import graph
 # ==================================================================================================
 
 # ENT_TYPE
-class ENT_TYPE():
+class ENT_TYPE(object):
     """
     A class that defines a set of constants for different entity types. 
     These types are used when adding an attrbute to the model.
@@ -28,7 +32,7 @@ class ENT_TYPE():
     MODEL = 'model'
 
 # DATA_TYPE
-class DATA_TYPE():
+class DATA_TYPE(object):
     """
     A class that defines a set of constants for possible data types for attributes. 
     These types are used when adding an attrbute to the model.
@@ -40,14 +44,14 @@ class DATA_TYPE():
     DICT =  'dict'
 
 # NODE TYPE
-class _NODE_TYPE():
+class _NODE_TYPE(object):
     ENT = 'entity'
     ATTRIB =  'attrib'
     ATTRIB_VAL =  'attrib_val'
     META = 'meta'
 
 # EDGE TYPE
-class _EDGE_TYPE():
+class _EDGE_TYPE(object):
     ENT = 'entity'
     ATTRIB =  'attrib'
     META = 'meta'
@@ -87,7 +91,7 @@ _ENT_SEQ = {
 # Class for reading and writing Spatial Information Models
 # ==================================================================================================
 
-class SIM():
+class SIM(object):
     """
     A class for creating Spatial Information Models (SIM models).
 
