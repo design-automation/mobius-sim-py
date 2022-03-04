@@ -55,7 +55,7 @@ print("Attrib values:", val1, val2, val3, val4, val5, val6, val7)
 # print info about the graph
 print(sm.info())
 
-json = sm.json_str()
+json = sm.to_json_str()
 with open("test.sim", "w") as f:
     f.write(json)
 print(json)

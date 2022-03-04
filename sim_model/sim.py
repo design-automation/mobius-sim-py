@@ -2,11 +2,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
-# from builtins import zip
-# from builtins import map
-# from builtins import dict
-# from builtins import range
-# from builtins import str
 from collections import OrderedDict
 import json
 from sim_model import graph
@@ -174,10 +169,12 @@ class SIM(object):
     def _graph_attrib_val_node_name(self, value):
         return 'val_' + str(value)
 
-    def _graph_add_attrib_val(self, value):
-        n = self._graph_attrib_val_node_name(value)
-        self.graph.add_node(n, node_type = _NODE_TYPE.ATTRIB_VAL, value = value)
-        return n
+    def _graph_add_attrib_val(self, att_n, value):
+        att_val_n = self._graph_attrib_val_node_name(value)
+        if not att_val_n in self.graph.nodes:
+            self.graph.add_node(att_val_n, node_type = _NODE_TYPE.ATTRIB_VAL, value = value)
+            self.graph.add_edge(att_val_n, att_n, edge_type = _EDGE_TYPE.ATTRIB) # att_val -> att
+        return att_val_n
 
     # ==============================================================================================
     # ADD METHODS FOR ENTITIES
@@ -332,9 +329,8 @@ class SIM(object):
         data_type = self._check_type(att_value)
         if self.graph.nodes[att_n].get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
-        att_val_n = self._graph_add_attrib_val(att_value)
+        att_val_n = self._graph_add_attrib_val(att_n, att_value)
         self.graph.add_edge(ent, att_val_n, edge_type = _EDGE_TYPE.ATTRIB) # ent -> att_val
-        self.graph.add_edge(att_val_n, att_n, edge_type = _EDGE_TYPE.ATTRIB) # att_val -> att
         
     def get_attrib_val(self, ent, name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
@@ -506,10 +502,10 @@ class SIM(object):
             all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
         return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
 
-    def json_str(self):
-        """Return a JSON formatted string representing that data in the model.
+    def to_json(self):
+        """Return JSON representing that data in the model.
         
-        :return: A JSON string in the SIM format.
+        :return: JSON data.
         """
         # get entities from graph
         posi_ents = self.graph.successors(ENT_TYPE.POSIS, _EDGE_TYPE.META)
@@ -607,6 +603,11 @@ class SIM(object):
             'geometry': geometry,
             'attributes': attributes
         }
-        return json.dumps(data)
+        return data
 
-
+    def to_json_str(self):
+        """Return a JSON formatted string representing that data in the model.
+        
+        :return: A JSON string in the SIM format.
+        """
+        return json.dumps(self.to_json())
