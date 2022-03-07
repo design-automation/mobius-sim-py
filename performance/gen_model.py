@@ -19,14 +19,14 @@ sm = sim.SIM()
 # coll
 coll = sm.add_coll()
 
-# create a points
+# create 1000 points
 for i in range(1000):
     point = sm.add_point(rand_posi())
     if random.random() > 0.1:
         sm.add_coll_ent(coll, point)
 
 # create 1000 plines
-for i in range(100):
+for i in range(1000):
     posis = []
     for j in range(random.randint(2, 30)):
         posis.append(rand_posi())

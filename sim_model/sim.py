@@ -77,9 +77,9 @@ _ENT_SEQ = {
     ENT_TYPE.EDGES: 2,
     ENT_TYPE.WIRES: 3,
     ENT_TYPE.POINTS: 4,
-    ENT_TYPE.PLINES: 5,
-    ENT_TYPE.PGONS: 6,
-    ENT_TYPE.COLLS: 7
+    ENT_TYPE.PLINES: 4,
+    ENT_TYPE.PGONS: 4,
+    ENT_TYPE.COLLS: 5
 }
 _ENT_SEQ_COLL_POINT_POSI = {
     ENT_TYPE.POSIS: 0,
@@ -405,6 +405,15 @@ class SIM(object):
         """
         return self.graph.degree(ent_type)
 
+    def _get_ent_seq(self, target_ent_type, source_ent_type):
+        if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
+            return _ENT_SEQ_COLL_POINT_POSI
+        elif (target_ent_type == ENT_TYPE.PLINES or source_ent_type == ENT_TYPE.PLINES):
+            return _ENT_SEQ_COLL_PLINE_POSI
+        elif (target_ent_type == ENT_TYPE.PGONS or source_ent_type == ENT_TYPE.PGONS):
+            return _ENT_SEQ_COLL_PGON_POSI
+        return _ENT_SEQ
+
     def get_ents(self, target_ent_type, source_ents = None):
         """Get entities of a specific type. A list of entity IDs is returned.
 
@@ -423,30 +432,32 @@ class SIM(object):
         """
         if source_ents == None:
             return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
-        source_ents = source_ents if type(source_ents) is list else [source_ents]
+        # not a list
+        if not type(source_ents) is list:
+            return self._nav(target_ent_type, source_ents)
+        # a list with one item
+        if len(source_ents) == 1:
+            return self._nav(target_ent_type, source_ents[0])
+        # a list with multiple items
         ents_set = OrderedDict() # ordered set
         for source_ent in source_ents:
             for target_ent in self._nav(target_ent_type, source_ent):
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
 
-    def _get_ent_seq(self, target_ent_type, source_ent_type):
-        if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
-            return _ENT_SEQ_COLL_POINT_POSI
-        elif (target_ent_type == ENT_TYPE.PLINES or source_ent_type == ENT_TYPE.PLINES):
-            return _ENT_SEQ_COLL_PLINE_POSI
-        elif (target_ent_type == ENT_TYPE.PGONS or source_ent_type == ENT_TYPE.PGONS):
-            return _ENT_SEQ_COLL_PGON_POSI
-        return _ENT_SEQ
-
+    # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
-        # TODO this method could be optimised
         source_ent_type = self.graph.nodes[source_ent].get('ent_type')
-        if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
-            return ents
         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
-        dir_down = ent_seq[source_ent_type] > ent_seq[target_ent_type]
-        navigate = self.graph.successors if dir_down else self.graph.predecessors
+        if source_ent_type == target_ent_type:
+            # TODO nav colls of colls
+            return [source_ent]
+        dist = ent_seq[source_ent_type] - ent_seq[target_ent_type]
+        if dist == 1:
+            return self.graph.successors(source_ent, _EDGE_TYPE.ENT)
+        if dist == -1:
+            return self.graph.predecessors(source_ent, _EDGE_TYPE.ENT)
+        navigate = self.graph.successors if dist > 0 else self.graph.predecessors
         ents = [source_ent]
         target_ents_set = OrderedDict()
         while ents:
@@ -457,10 +468,102 @@ class SIM(object):
                     if this_ent_type in ent_seq:
                         if this_ent_type == target_ent_type:
                             target_ents_set[target_ent] = None # orderd set
-                        elif ent_seq[this_ent_type] > ent_seq[target_ent_type] if dir_down else ent_seq[this_ent_type] < ent_seq[target_ent_type]:
+                        elif dist > 0 and ent_seq[this_ent_type] > ent_seq[target_ent_type]:
+                            ent_set[target_ent] = None # orderd set
+                        elif dist < 0 and ent_seq[this_ent_type] < ent_seq[target_ent_type]:
                             ent_set[target_ent] = None # orderd set
             ents = ent_set.keys()
         return target_ents_set.keys()
+
+    # def get_ents2(self, target_ent_type, source_ents = None):
+    #     """Get entities of a specific type. A list of entity IDs is returned.
+
+    #     If source_ents is None, then all entities of the specified type in the model are returned.
+    #     If there are no entities of that type in the model, then an empty list is returned. 
+
+    #     If source_ents contains a list of entities, then entities will be extracted from the source
+    #     ents. For example, if ent_type is 'posis' and 'source_ents' is a polyline and a polygon,
+    #     then a list containing the positions used in the polyline and polygon are returned. 
+    #     Similarly, if ent_type is 'pgons' and 'source_ents' is a list of positions,
+    #     then a list of polygons is returned, of polygons that make use of the specified positions.
+
+    #     :param target_ent_type: The type of entity to get from the model.
+    #     :param source_ents: None, or a single entity ID or a list of entity IDs from which to get the target entities.
+    #     :return: A list of unique entity IDs.
+    #     """
+    #     if source_ents == None:
+    #         return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
+    #     source_ents = source_ents if type(source_ents) is list else [source_ents]
+    #     ents_set = OrderedDict() # ordered set
+    #     for source_ent in source_ents:
+    #         for target_ent in self._nav2(target_ent_type, source_ent):
+    #             ents_set[target_ent] = None # ordered set
+    #     return list(ents_set.keys())
+
+    # def _nav2(self, target_ent_type, source_ent):
+    #     source_ent_type = self.graph.nodes[source_ent].get('ent_type')
+    #     if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
+    #         return source_ent
+    #     ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
+    #     dir_down = ent_seq[source_ent_type] > ent_seq[target_ent_type]
+    #     navigate = self.graph.successors if dir_down else self.graph.predecessors
+    #     ents = [source_ent]
+    #     target_ents_set = OrderedDict()
+    #     while ents:
+    #         ent_set = OrderedDict()
+    #         for ent in ents:
+    #             for target_ent in navigate(ent, _EDGE_TYPE.ENT):
+    #                 this_ent_type = self.graph.nodes[target_ent].get('ent_type')
+    #                 if this_ent_type in ent_seq:
+    #                     if this_ent_type == target_ent_type:
+    #                         target_ents_set[target_ent] = None # orderd set
+    #                     elif ent_seq[this_ent_type] > ent_seq[target_ent_type] if dir_down else ent_seq[this_ent_type] < ent_seq[target_ent_type]:
+    #                         ent_set[target_ent] = None # orderd set
+    #         ents = ent_set.keys()
+    #     return target_ents_set.keys()
+
+    # def get_ents3(self, target_ent_type, source_ents = None):
+    #     print ("get ents")
+    #     if source_ents == None:
+    #         return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
+    #     if not type(source_ents) is list:
+    #         source_ent_type = self.graph.nodes[source_ents].get('ent_type')
+    #         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
+    #         return self._nav_recursive_one(target_ent_type, source_ents, ent_seq)
+    #     ents_set = OrderedDict()
+    #     for source_ent in source_ents:
+    #         source_ent_type = self.graph.nodes[source_ent].get('ent_type')
+    #         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
+    #         for ent  in self._nav_recursive(target_ent_type, source_ent, ent_seq):
+    #             ents_set[ent] = None # ordered set
+    #     return ents_set.keys()
+
+    # def _nav_recursive_one(self, target_ent_type, source_ent, ent_seq):
+    #     source_ent_type = self.graph.nodes[source_ent].get('ent_type')
+    #     # if not source_ent_type in ent_seq:
+    #     #     print (">>", source_ent, ent_seq)
+    #     if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
+    #         return source_ent
+    #     dist = ent_seq[source_ent_type] - ent_seq[target_ent_type]
+    #     if dist == 1:
+    #         return self.graph.successors(source_ent, _EDGE_TYPE.ENT)
+    #     if dist == -1:
+    #         return self.graph.predecessors(source_ent, _EDGE_TYPE.ENT)
+    #     if dist > 1:
+    #         return self._nav_recursive(target_ent_type, self.graph.successors(source_ent, _EDGE_TYPE.ENT), ent_seq)
+    #     if dist < -1:
+    #         return self._nav_recursive(target_ent_type, self.graph.predecessors(source_ent, _EDGE_TYPE.ENT), ent_seq)
+
+    # def _nav_recursive(self, target_ent_type, source_ents, ent_seq):
+    #     if not type(source_ents) is list:
+    #         return self._nav_recursive_one(target_ent_type, source_ents, ent_seq)
+    #     if len(source_ents) == 1:
+    #         return self._nav_recursive_one(target_ent_type, source_ents[0], ent_seq)
+    #     ents_set = OrderedDict()
+    #     for a_source_ent in source_ents:
+    #         for ent in self._nav_recursive(target_ent_type, a_source_ent, ent_seq):
+    #             ents_set[ent] = None # ordered set
+    #     return ents_set.keys()
 
     def get_point_posi(self, point):
         """Get the position ID for a point.
@@ -468,7 +571,7 @@ class SIM(object):
         :param point: A point ID from which to get the position.
         :return: A position ID. 
         """
-        vert = self.get_ents(ENT_TYPE.VERTS, point)[0]
+        vert = self.graph.successors(point, _EDGE_TYPE.ENT)[0]
         return self.graph.successors(vert, _EDGE_TYPE.ENT)[0]
 
     def get_pline_posis(self, pline):
@@ -478,8 +581,8 @@ class SIM(object):
         :param pline: A polyline ID from which to get the positions.
         :return: A list of position IDs. The list may contain duplicates.
         """
-
-        edges = self.get_ents(ENT_TYPE.EDGES, pline)
+        wire = self.graph.successors(pline, _EDGE_TYPE.ENT)[0]
+        edges = self.graph.successors(wire, _EDGE_TYPE.ENT)
         verts = [self.graph.successors(edge, _EDGE_TYPE.ENT)[0] for edge in edges]
         posis = [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
         last_vert = self.graph.successors(edges[-1], _EDGE_TYPE.ENT)[1]
@@ -495,12 +598,12 @@ class SIM(object):
         :return: A list of lists of position IDs. The lists may contain duplicates.
         """
         posis = []
-        for wire in self.get_ents(ENT_TYPE.WIRES, pgon):
-            verts = self.get_ents(ENT_TYPE.VERTS, wire)
+        for wire in self.graph.successors(pgon, _EDGE_TYPE.ENT):
+            edges = self.graph.successors(wire, _EDGE_TYPE.ENT)
+            verts = [self.graph.successors(edge, _EDGE_TYPE.ENT)[0] for edge in edges]
             wire_posis = [self.graph.successors(vert, _EDGE_TYPE.ENT)[0] for vert in verts]
             posis.append(wire_posis)
         return posis
-
 
     # ==============================================================================================
     # QUERY
