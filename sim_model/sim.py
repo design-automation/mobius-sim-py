@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import unicode_literals
 from collections import OrderedDict
 import json
+from xml.dom.minidom import Entity
 from sim_model import graph
 # ==================================================================================================
 # Constants
@@ -75,10 +76,32 @@ _ENT_SEQ = {
     ENT_TYPE.VERTS: 1,
     ENT_TYPE.EDGES: 2,
     ENT_TYPE.WIRES: 3,
-    ENT_TYPE.POINTS: 10,
-    ENT_TYPE.PLINES: 20,
-    ENT_TYPE.PGONS: 30,
-    ENT_TYPE.COLLS: 40
+    ENT_TYPE.POINTS: 4,
+    ENT_TYPE.PLINES: 5,
+    ENT_TYPE.PGONS: 6,
+    ENT_TYPE.COLLS: 7
+}
+_ENT_SEQ_COLL_POINT_POSI = {
+    ENT_TYPE.POSIS: 0,
+    ENT_TYPE.VERTS: 1,
+    ENT_TYPE.POINTS: 2,
+    ENT_TYPE.COLLS: 3
+}
+_ENT_SEQ_COLL_PLINE_POSI = {
+    ENT_TYPE.POSIS: 0,
+    ENT_TYPE.VERTS: 1,
+    ENT_TYPE.EDGES: 2,
+    ENT_TYPE.WIRES: 3,
+    ENT_TYPE.PLINES: 4,
+    ENT_TYPE.COLLS: 5
+}
+_ENT_SEQ_COLL_PGON_POSI = {
+    ENT_TYPE.POSIS: 0,
+    ENT_TYPE.VERTS: 1,
+    ENT_TYPE.EDGES: 2,
+    ENT_TYPE.WIRES: 3,
+    ENT_TYPE.PGONS: 4,
+    ENT_TYPE.COLLS: 5
 }
 
 # ==================================================================================================
@@ -136,7 +159,7 @@ class SIM(object):
         val_type = type(value)
         if val_type == int or val_type == float:
             return DATA_TYPE.NUM
-        if val_type == str:
+        if val_type == str or val_type == unicode:
             return DATA_TYPE.STR
         if val_type == bool:
             return DATA_TYPE.BOOL
@@ -144,7 +167,7 @@ class SIM(object):
             return DATA_TYPE.LIST
         if val_type == dict:
             return DATA_TYPE.DICT
-        raise Exception('Data type is not recognised.')
+        raise Exception('Data type is not recognised:', str(value), type(value))
 
     # ==============================================================================================
     # PRIVATE GRAPH METHODS
@@ -407,13 +430,23 @@ class SIM(object):
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
 
+    def _get_ent_seq(self, target_ent_type, source_ent_type):
+        if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
+            return _ENT_SEQ_COLL_POINT_POSI
+        elif (target_ent_type == ENT_TYPE.PLINES or source_ent_type == ENT_TYPE.PLINES):
+            return _ENT_SEQ_COLL_PLINE_POSI
+        elif (target_ent_type == ENT_TYPE.PGONS or source_ent_type == ENT_TYPE.PGONS):
+            return _ENT_SEQ_COLL_PGON_POSI
+        return _ENT_SEQ
+
     def _nav(self, target_ent_type, source_ent):
         # TODO this method could be optimised
         source_ent_type = self.graph.nodes[source_ent].get('ent_type')
-        if source_ent_type == target_ent_type:
+        if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
             return ents
-        dir = _ENT_SEQ[source_ent_type] - _ENT_SEQ[target_ent_type]
-        navigate = self.graph.successors if dir > 0 else self.graph.predecessors
+        ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
+        dir_down = ent_seq[source_ent_type] > ent_seq[target_ent_type]
+        navigate = self.graph.successors if dir_down else self.graph.predecessors
         ents = [source_ent]
         target_ents_set = OrderedDict()
         while ents:
@@ -421,11 +454,11 @@ class SIM(object):
             for ent in ents:
                 for target_ent in navigate(ent, _EDGE_TYPE.ENT):
                     this_ent_type = self.graph.nodes[target_ent].get('ent_type')
-                    if this_ent_type == target_ent_type:
-                        target_ents_set[target_ent] = None # orderd set
-                    else:
-                        # TODO we may have passed the target already
-                        ent_set[target_ent] = None # orderd set
+                    if this_ent_type in ent_seq:
+                        if this_ent_type == target_ent_type:
+                            target_ents_set[target_ent] = None # orderd set
+                        elif ent_seq[this_ent_type] > ent_seq[target_ent_type] if dir_down else ent_seq[this_ent_type] < ent_seq[target_ent_type]:
+                            ent_set[target_ent] = None # orderd set
             ents = ent_set.keys()
         return target_ents_set.keys()
 
