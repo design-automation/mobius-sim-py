@@ -403,7 +403,7 @@ class SIM(object):
         :param ent_type: The type of entity to search for in the model.
         :return: A number of entities of the specified type in the model.
         """
-        return self.graph.degree(ent_type)
+        return self.graph.degree(ent_type, _EDGE_TYPE.META)
 
     def _get_ent_seq(self, target_ent_type, source_ent_type):
         if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
