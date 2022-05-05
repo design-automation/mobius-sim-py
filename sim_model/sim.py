@@ -747,3 +747,20 @@ class SIM(object):
         :return: A JSON string in the SIM format.
         """
         return json.dumps(self.to_json())
+
+    # ==============================================================================================
+    # IMPORT
+    # ==============================================================================================
+    def import_json(self, json_data):
+        """Import JSON data representing that data in the model.
+        
+        :return: No value.
+        """
+        pass
+
+    def import_json_str(self, json_str):
+        """Import JSON string representing that data in the model.
+        
+        :return: No value.
+        """
+        self.import_json(json.loads(json_str))
