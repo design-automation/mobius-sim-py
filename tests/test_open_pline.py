@@ -23,22 +23,22 @@ class TestClosedPolylines(unittest.TestCase):
 
     def test_get_pline(self):
         plines = self.model.get_ents(ENT_TYPE.PLINES)
-        self.assertEqual(plines, ['pl0'])
+        self.assertEqual(list(plines), ['pl0'])
 
     def test_pline_to_posis(self):
         plines = self.model.get_ents(ENT_TYPE.PLINES)
         posis = self.model.get_ents(ENT_TYPE.POSIS, plines)
-        self.assertEqual(posis, ['ps0', 'ps1', 'ps2', 'ps3'])
+        self.assertEqual(list(posis), ['ps0', 'ps1', 'ps2', 'ps3'])
 
     def test_pline_to_verts(self):
         plines = self.model.get_ents(ENT_TYPE.PLINES)
         verts = self.model.get_ents(ENT_TYPE.VERTS, plines)
-        self.assertEqual(verts, ['_v0', '_v1', '_v2', '_v3'])
+        self.assertEqual(list(verts), ['_v0', '_v1', '_v2', '_v3'])
 
     def test_pline_to_edges(self):
         plines = self.model.get_ents(ENT_TYPE.PLINES)
         edges = self.model.get_ents(ENT_TYPE.EDGES, plines)
-        self.assertEqual(edges, ['_e0', '_e1', '_e2'])
+        self.assertEqual(list(edges), ['_e0', '_e1', '_e2'])
 
 if __name__ == '__main__':
     unittest.main()

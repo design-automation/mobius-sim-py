@@ -18,12 +18,21 @@ class TestAttribs(unittest.TestCase):
         m.add_attrib(ENT_TYPE.POINTS, 'test', DATA_TYPE.STR)
         m.set_attrib_val(point1, 'test', 'hello')
         m.set_attrib_val(point2, 'test', 'hello')
+        m.set_model_attrib_val("a_sting", "hello")
+        m.set_model_attrib_val("a_number", 123)
+        m.set_model_attrib_val("a_list", [1, "two", [3]])
+        m.set_model_attrib_val("a_dict", { "a": 1, "b": "two", "c": [3]})
         self.model = m
 
     def test_get_point(self):
-        json = self.model.to_json()
+        json = self.model.export_sim_data()
         data = [{"name": "test", "data_type": "string", "values": ["hello"], "entities": [[0, 1]]}]
         self.assertEqual(json['attributes']['points'], data)
+        self.assertEqual( self.model.get_model_attrib_val("a_sting"), "hello")
+        self.assertEqual( self.model.get_model_attrib_val("a_number"), 123)
+        self.assertEqual( self.model.get_model_attrib_val("a_list"), [1, "two", [3]])
+        self.assertEqual( self.model.get_model_attrib_val("a_dict"), { "a": 1, "b": "two", "c": [3]})
+        
 
 if __name__ == '__main__':
     unittest.main()

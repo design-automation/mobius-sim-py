@@ -2,6 +2,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
+import sys
+print("PYTHON Version: ", sys.version_info)
+if sys.version_info[0] >= 3:
+    unicode = str
 from collections import OrderedDict
 import json
 from xml.dom.minidom import Entity
@@ -393,6 +397,16 @@ class SIM(object):
         """
         return self.graph.data[att_name]
 
+    def get_model_attribs(self):
+        """Get a list of attribute names from the model. Model attributes are
+        top level attributes that apply to the whole model. As such, they are not attached to any
+        specific entities.
+
+        :return: A list of attribute names.
+        """
+        print(self.graph.data)
+        return [] # self.graph.data.keys()
+
     # ==============================================================================================
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
@@ -638,8 +652,8 @@ class SIM(object):
             all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
         return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
 
-    def to_json(self):
-        """Return JSON representing that data in the model.
+    def export_sim_data(self):
+        """Return JSON representing that data in the SIM model.
         
         :return: JSON data.
         """
@@ -741,26 +755,91 @@ class SIM(object):
         }
         return data
 
-    def to_json_str(self):
+    def export_sim(self):
         """Return a JSON formatted string representing that data in the model.
         
         :return: A JSON string in the SIM format.
         """
-        return json.dumps(self.to_json())
+        return json.dumps(self.export_sim_data())
 
+    def export_sim_file(self, filepath):
+        """Import SIM file.
+        
+        :return: No value.
+        """
+        with open(filepath, 'w') as f:
+            f.write( json.dumps(self.export_sim_data()) )
     # ==============================================================================================
     # IMPORT
     # ==============================================================================================
-    def import_json(self, json_data):
-        """Import JSON data representing that data in the model.
+    def import_sim_data(self, json_data):
+        """Import SIM JSON data.
         
         :return: No value.
         """
-        pass
+        # positions
+        posis = []
+        for i in range(json_data['geometry']['num_posis']):
+            posis.append(self.add_posi([0,0,0]))
+        # points
+        for posi_i in json_data['geometry'][ENT_TYPE.POINTS]:
+            self.add_point(posis[posi_i])
+        # polylines
+        for posis_i in json_data['geometry'][ENT_TYPE.PLINES]:
+            closed = posis_i[0] == posis_i[-1]
+            self.add_pline(map(lambda posi_i: posis[posi_i], posis_i), closed)
+        # polygons
+        for posis_i in json_data['geometry'][ENT_TYPE.PGONS]:
+            self.add_pgon(map(lambda posi_i: posis[posi_i], posis_i[0]))
+            # TODO add holes
+        # collections
+        num_colls = len(json_data['geometry']['coll_points'])
+        for i in range(num_colls):
+            coll = self.add_coll()
+            for point_i in json_data['geometry']['coll_points'][i]:
+                self.add_coll_ent(coll, 'pt' + str(point_i))
+            for pline_i in json_data['geometry']['coll_plines'][i]:
+                self.add_coll_ent(coll, 'pl' + str(pline_i))
+            for pgon_i in json_data['geometry']['coll_pgons'][i]:
+                self.add_coll_ent(coll, 'pg' + str(pgon_i))
+            for child_coll_i in json_data['geometry']['coll_colls'][i]:
+                self.add_coll_ent(coll, 'co' + str(child_coll_i))
+        # entity attribs
+        ent_types = [
+            [ENT_TYPE.POSIS, 'ps'],
+            [ENT_TYPE.VERTS, '_v'],
+            [ENT_TYPE.EDGES, '_e'],
+            [ENT_TYPE.WIRES, '_w'],
+            [ENT_TYPE.POINTS, 'pt'],
+            [ENT_TYPE.PLINES, 'pl'],
+            [ENT_TYPE.PGONS, 'pg'],
+            [ENT_TYPE.COLLS, 'co']
+        ]
+        for ent_type, ent_prefix in ent_types:
+            for attrib in json_data['attributes'][ent_type]:
+                att_name = attrib['name']
+                if att_name != 'xyz':
+                    self.add_attrib(ent_type, att_name, attrib['data_type'])
+                for i in range(len(attrib['values'])):
+                    att_value = attrib['values'][i]
+                    for ent_i in attrib['entities'][i]:
+                        ent = ent_prefix + str(ent_i)
+                        self.set_attrib_val(ent, att_name, att_value)
+        # model attributes
+        for [attrib_name, attrib_val] in json_data['attributes']['model']:
+            self.set_model_attrib_val(attrib_name, attrib_val)
 
-    def import_json_str(self, json_str):
-        """Import JSON string representing that data in the model.
+    def import_sim(self, json_str):
+        """Import SIM string.
         
         :return: No value.
         """
-        self.import_json(json.loads(json_str))
+        self.import_sim_data(json.loads(json_str))
+
+    def import_sim_file(self, filepath):
+        """Import SIM file.
+        
+        :return: No value.
+        """
+        with open(filepath, 'r') as f:
+            self.import_sim_data(json.loads(f.read()))

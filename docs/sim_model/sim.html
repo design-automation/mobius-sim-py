@@ -66,7 +66,7 @@ polygon boundary. Subsequent wires spcify the polygon holes.</p></li>
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_attrib">
-<span class="sig-name descname"><span class="pre">add_attrib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_attrib" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_attrib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_data_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_attrib" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new attribute in the model, specifying the entity type, the attribute name, and
 the data type. Note that for each entity type, the attribute name must be a unique name.</p>
 <dl class="field-list simple">
@@ -96,7 +96,7 @@ the data type. Note that for each entity type, the attribute name must be a uniq
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_coll_ent">
-<span class="sig-name descname"><span class="pre">add_coll_ent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_coll_ent" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_coll_ent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_coll_ent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an entity to an existing collection in the model.
 Collections can contain points, polylines, polygons, and other collections.
 Collections cannot contain positions, vertices, edges or wires.</p>
@@ -115,7 +115,7 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_pgon">
-<span class="sig-name descname"><span class="pre">add_pgon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pgon" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_pgon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pgon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a polygon object to the model, specifying a list of positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -129,7 +129,7 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_pline">
-<span class="sig-name descname"><span class="pre">add_pline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pline" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_pline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_pline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a polyline object to the model, specifying a list of positions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -146,7 +146,7 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_point">
-<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_point" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a point object to the model, specifying a single position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -160,7 +160,7 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.add_posi">
-<span class="sig-name descname"><span class="pre">add_posi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_posi" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_posi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.add_posi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a position to the model, specifying the XYZ coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -173,8 +173,41 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.export_sim">
+<span class="sig-name descname"><span class="pre">export_sim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.export_sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a JSON formatted string representing that data in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A JSON string in the SIM format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.export_sim_data">
+<span class="sig-name descname"><span class="pre">export_sim_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.export_sim_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return JSON representing that data in the SIM model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>JSON data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.export_sim_file">
+<span class="sig-name descname"><span class="pre">export_sim_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.export_sim_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import SIM file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.get_attrib_val">
-<span class="sig-name descname"><span class="pre">get_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_attrib_val" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_attrib_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an attribute value from an entity in the model, specifying the attribute name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -191,7 +224,7 @@ Collections cannot contain positions, vertices, edges or wires.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.get_ents">
-<span class="sig-name descname"><span class="pre">get_ents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ent_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_ents" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_ents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ent_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_ents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_ents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get entities of a specific type. A list of entity IDs is returned.</p>
 <p>If source_ents is None, then all entities of the specified type in the model are returned.
 If there are no entities of that type in the model, then an empty list is returned.</p>
@@ -215,7 +248,7 @@ then a list of polygons is returned, of polygons that make use of the specified 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.get_model_attrib_val">
-<span class="sig-name descname"><span class="pre">get_model_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">att_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_model_attrib_val" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_model_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">att_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_model_attrib_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an attribute value from the model, specifying a name. Model attributes are
 top level attributes that apply to the whole model. As such, they are not attached to any
 specific entities.</p>
@@ -225,6 +258,19 @@ specific entities.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The attribute value or None if no value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.get_model_attribs">
+<span class="sig-name descname"><span class="pre">get_model_attribs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.get_model_attribs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of attribute names from the model. Model attributes are
+top level attributes that apply to the whole model. As such, they are not attached to any
+specific entities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of attribute names.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -274,6 +320,39 @@ positions will be the same.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.import_sim">
+<span class="sig-name descname"><span class="pre">import_sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.import_sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import SIM string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.import_sim_data">
+<span class="sig-name descname"><span class="pre">import_sim_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.import_sim_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import SIM JSON data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sim_model.sim.SIM.import_sim_file">
+<span class="sig-name descname"><span class="pre">import_sim_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.import_sim_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import SIM file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>No value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.info">
 <span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print information about the model. This is mainly used for debugging.</p>
@@ -285,19 +364,8 @@ positions will be the same.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="sim_model.sim.SIM.json_str">
-<span class="sig-name descname"><span class="pre">json_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.json_str" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a JSON formatted string representing that data in the model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A JSON string in the SIM format.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.num_ents">
-<span class="sig-name descname"><span class="pre">num_ents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.num_ents" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">num_ents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.num_ents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of entities in the model of a specific type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -311,7 +379,7 @@ positions will be the same.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.pline_is_closed">
-<span class="sig-name descname"><span class="pre">pline_is_closed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.pline_is_closed" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pline_is_closed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.pline_is_closed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a polyline is open or closed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -325,7 +393,7 @@ positions will be the same.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.set_attrib_val">
-<span class="sig-name descname"><span class="pre">set_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_attrib_val" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_attrib_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of an attribute, specifying the entity in the model, the attribute name and
 the attribute value.</p>
 <p>Note that an attribute with the specified name must already exist in 
@@ -347,7 +415,7 @@ attribute value and the data type for the attribute must match.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sim_model.sim.SIM.set_model_attrib_val">
-<span class="sig-name descname"><span class="pre">set_model_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">att_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_model_attrib_val" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_model_attrib_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">att_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">att_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sim_model.sim.SIM.set_model_attrib_val" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set an attribute value from the model, specifying a name and value. Model attributes are
 top level attributes that apply to the whole model. As such, they are not attached to any
 specific entities.</p>
@@ -423,7 +491,7 @@ specific entities.</p>
       &copy;2022, Patrick Janssen.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
