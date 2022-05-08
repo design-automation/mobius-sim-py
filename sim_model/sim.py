@@ -259,7 +259,8 @@ class SIM(object):
         The entity_type node wil be connected to the entity node.
         """
         # create the node name, from prefix and then next count number
-        n = _ENT_PREFIX[enty_type] + str(self.graph.degree(enty_type, edge_type = _EDGE_TYPE.META))
+        ent_i = self.graph.degree_out(enty_type, edge_type = _EDGE_TYPE.META)
+        n = _ENT_PREFIX[enty_type] + str(ent_i)
         # add a node with name `n`
         # the new node has 2 properties
         self.graph.add_node(n, 
@@ -320,7 +321,7 @@ class SIM(object):
         # get the name of the attribute value node
         att_val_n = self._graph_attrib_val_node_name(value)
         # make sure that no node with the name already exists
-        if not att_val_n in self.graph.nodes:
+        if not self.graph.has_node(att_val_n):
             # add the attrib value node
             # the new node has 2 properties
             self.graph.add_node(att_val_n, 
@@ -443,7 +444,7 @@ class SIM(object):
         :param ent: The ID of the entity to be added to the collection.
         :return: No value.
         """
-        ent_type = self.graph.nodes[ent].get('ent_type')
+        ent_type = self.graph.get_node(ent).get('ent_type')
         if ent_type not in _COLL_ENT_TYPES:
             raise Exception('Invalid entitiy for collections.')
         self.graph.add_edge(coll, ent, edge_type = _EDGE_TYPE.ENT)
@@ -462,9 +463,9 @@ class SIM(object):
         :return: No value.
         """
         att_n = self._graph_attrib_node_name(ent_type, att_name)
-        if self.graph.nodes.get(att_n) == None:
+        if not self.graph.has_node(att_n):
             self._graph_add_attrib(ent_type, att_name, att_data_type)
-        elif self.graph.nodes[att_n].get('data_type') != att_data_type:
+        elif self.graph.get_node(att_n).get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
             
     def get_attribs(self, ent_type):
@@ -474,7 +475,7 @@ class SIM(object):
         :return: A list of attrib names.
         """
         return map(
-            lambda att_n: self.graph.nodes[att_n].get('name'), 
+            lambda att_n: self.graph.get_node(att_n).get('name'), 
             self.graph.successors(ent_type + '_attribs', _EDGE_TYPE.META)
         )
 
@@ -491,12 +492,12 @@ class SIM(object):
         :param att_value: The attribute value to set.
         :return: No value.
         """
-        ent_type = self.graph.nodes[ent].get('ent_type')
+        ent_type = self.graph.get_node(ent).get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, att_name)
-        if ent_type != self.graph.nodes[att_n].get('ent_type'):
+        if ent_type != self.graph.get_node(att_n).get('ent_type'):
             raise Exception('Entity and attribute have different types.')
         data_type = self._check_type(att_value)
-        if self.graph.nodes[att_n].get('data_type') != data_type:
+        if self.graph.get_node(att_n).get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
         att_val_n = self._graph_add_attrib_val(att_n, att_value)
         self.graph.add_edge(ent, att_val_n, edge_type = att_n) # ent -> att_val
@@ -508,12 +509,12 @@ class SIM(object):
         :param name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        ent_type = self.graph.nodes[ent].get('ent_type')
+        ent_type = self.graph.get_node(ent).get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, name)
         att_vals_n = self.graph.successors(ent, att_n)
         if att_vals_n == None:
             return None
-        return self.graph.nodes[att_vals_n].get('value')
+        return self.graph.get_node(att_vals_n).get('value')
 
     def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
@@ -560,7 +561,7 @@ class SIM(object):
 
     # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
-        source_ent_type = self.graph.nodes[source_ent].get('ent_type')
+        source_ent_type = self.graph.get_node(source_ent).get('ent_type')
         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
         if source_ent_type == target_ent_type:
             # TODO nav colls of colls
@@ -577,7 +578,7 @@ class SIM(object):
             ent_set = OrderedDict()
             for ent in ents:
                 for target_ent in navigate(ent, _EDGE_TYPE.ENT):
-                    this_ent_type = self.graph.nodes[target_ent].get('ent_type')
+                    this_ent_type = self.graph.get_node(target_ent).get('ent_type')
                     if this_ent_type in ent_seq:
                         if this_ent_type == target_ent_type:
                             target_ents_set[target_ent] = None # orderd set
@@ -594,7 +595,7 @@ class SIM(object):
         :param ent_type: The type of entity to search for in the model.
         :return: A number of entities of the specified type in the model.
         """
-        return self.graph.degree(ent_type, _EDGE_TYPE.META)
+        return self.graph.degree_out(ent_type, _EDGE_TYPE.META)
 
     def get_ents(self, target_ent_type, source_ents = None):
         """Get entities of a specific type. A list of entity IDs is returned.
@@ -691,11 +692,14 @@ class SIM(object):
         
         :return: A string describing the data in the model.
         """
-        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.nodes[n]), self.graph.nodes)
+        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.get_node(n)), self.graph._nodes)
         nodes = '\n'.join(nodes)
         all_edges = ''
-        for edge_type in self.graph.edge_types:
-            edges = map(lambda e: '- ' + e + ': ' + str(self.graph.edges_fwd[edge_type][e]), self.graph.edges_fwd[edge_type])
+        for edge_type in self.graph._edge_types:
+            edges = map(
+                lambda e: '- ' + e + ': ' + str(self.graph._edges_fwd[edge_type][e]), 
+                self.graph._edges_fwd[edge_type]
+            )
             edges = '\n'.join(edges)
             all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
         return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
@@ -725,7 +729,7 @@ class SIM(object):
         colls_dict = dict( zip(coll_ents, range(len(coll_ents))) )
         # create the geometry data
         geometry = {
-            'num_posis': self.graph.degree(ENT_TYPE.POSIS, _EDGE_TYPE.META),
+            'num_posis': self.graph.degree_out(ENT_TYPE.POSIS, _EDGE_TYPE.META),
             'points': [],
             'plines': [],
             'pgons': [],
@@ -749,7 +753,7 @@ class SIM(object):
             geometry['coll_pgons'].append([])
             geometry['coll_colls'].append([])
             for ent in self.graph.successors(coll_ent, _EDGE_TYPE.ENT):
-                ent_type = self.graph.nodes[ent].get('ent_type')
+                ent_type = self.graph.get_node(ent).get('ent_type')
                 if ent_type == ENT_TYPE.POINTS:
                     geometry['coll_points'][-1].append(points_dict[ent])
                 elif ent_type == ENT_TYPE.PLINES:
@@ -773,12 +777,12 @@ class SIM(object):
             for att_n in attribs:
                 data = OrderedDict()
                 att_vals_n = self.graph.predecessors(att_n, _EDGE_TYPE.ATTRIB)
-                data['name'] = self.graph.nodes[att_n].get('name')
-                data['data_type'] = self.graph.nodes[att_n].get('data_type')
+                data['name'] = self.graph.get_node(att_n).get('name')
+                data['data_type'] = self.graph.get_node(att_n).get('data_type')
                 data['values'] = []
                 data['entities'] = []
                 for att_val_n in att_vals_n:
-                    data['values'].append(self.graph.nodes[att_val_n].get('value'))
+                    data['values'].append(self.graph.get_node(att_val_n).get('value'))
                     # idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
                     idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, att_n)]
                     data['entities'].append(idxs)

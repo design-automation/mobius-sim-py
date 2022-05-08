@@ -19,14 +19,14 @@ sm = sim.SIM()
 # coll
 coll = sm.add_coll()
 
-# create 1000 points
-for i in range(1000):
+# create 10000 points
+for i in range(10000):
     point = sm.add_point(rand_posi())
     if random.random() > 0.1:
         sm.add_coll_ent(coll, point)
 
-# create 1000 plines
-for i in range(1000):
+# create 10000 plines
+for i in range(10000):
     posis = []
     for j in range(random.randint(2, 30)):
         posis.append(rand_posi())
@@ -34,8 +34,8 @@ for i in range(1000):
     if random.random() > 0.1:
         sm.add_coll_ent(coll, pline)
 
-# create 1000 pgons
-for i in range(1000):
+# create 10000 pgons
+for i in range(10000):
     posis = []
     for j in range(random.randint(3, 30)):
         posis.append(rand_posi())
