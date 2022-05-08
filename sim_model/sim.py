@@ -8,8 +8,16 @@ if sys.version_info[0] >= 3:
     unicode = str
 from collections import OrderedDict
 import json
-from xml.dom.minidom import Entity
 from sim_model import graph
+
+# ==================================================================================================
+# TODO
+# ==================================================================================================
+
+# Navigate colls of colls
+# Import SIM model with polygons with holes
+# More test
+
 # ==================================================================================================
 # Constants
 # ==================================================================================================
@@ -141,9 +149,10 @@ class SIM(object):
         """
 
        # graph
-        self.graph = graph.Graph([
-            _EDGE_TYPE.ENT, _EDGE_TYPE.ATTRIB, _EDGE_TYPE.META
-        ])
+        self.graph = graph.Graph()
+        self.graph.add_edge_type(_EDGE_TYPE.ENT, graph.M2M) # many to many
+        self.graph.add_edge_type(_EDGE_TYPE.ATTRIB, graph.M2O) # many to one
+        self.graph.add_edge_type(_EDGE_TYPE.META, graph.O2M) # one to many
 
         # create meta nodes
         meta = [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
@@ -154,6 +163,9 @@ class SIM(object):
 
         # add xyz attrib
         self._graph_add_attrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
+
+        # model attrbutes
+        self.model_attribs = {}
 
     # ==============================================================================================
     # UTILITY 
@@ -176,31 +188,150 @@ class SIM(object):
     # ==============================================================================================
     # PRIVATE GRAPH METHODS
     # ==============================================================================================
+    """
+    The nodes for entities are:
+    
+    - ent nodes 
+      - e.g. 'ps01', '_v123'
+      - node_type = 'entity'
+
+    - ent_type nodes 
+      - e.g. 'posis', 'verts'
+      - node_type = 'meta'
+
+    The nodes for attribs are:
+
+    - ent_type_attribs nodes 
+      - e.g.'pgons_attribs'
+      - node_type = 'meta'
+
+    - att_ent_type_name nodes 
+      - e.g. 'att_pgons_area'
+      - node_type = 'attrib'
+
+    - attrib_val nodes 
+      - e.g. 'val_[1,2,3]'
+      - node_type = 'attrib_val'
+
+    The forward edges are as follows:
+    
+    Edges of type 'entity':
+
+    - ent -> sub_ents 
+      - e.g. pg0 -> [w0, w1]
+      - edge_type = 'entity'
+      - many to many
+
+    Edges of type 'meta':
+
+    - ent_type -> ents
+      - e.g. pgons -> pg0
+      - edge_type = 'meta'
+      - one to many
+
+    - ent_type_attribs -> att_ent_type_name 
+      - e.g. pgons_attribs -> att_pgons_area) 
+      - edge_type = 'meta'
+      - one to many
+
+    Edges of type 'attrib':
+
+    - attrib_val -> att_ent_type_name 
+      - e.g. val_123 -> att_pgons_area
+      - edge_type = 'attrib' 
+      - many to one
+
+    Edges of with a type specific to the attribute:
+
+    - ent -> attrib_val 
+      - pg0 -> val_123
+      - edge_type = att_ent_type_name e.g. 'att_pgons_area'
+      - many to one
+
+    For each forward edge, there is an equivalent reverse edge.
+
+    """
 
     def _graph_add_ent(self, enty_type):
+        """Add an entity node to the graph. 
+        The entity can be a posi, vert, edge, wire, point, pline, pgon, coll.
+        The entity node will have a name.
+        The entity_type node wil be connected to the entity node.
+        """
+        # create the node name, from prefix and then next count number
         n = _ENT_PREFIX[enty_type] + str(self.graph.degree(enty_type, edge_type = _EDGE_TYPE.META))
-        self.graph.add_node(n, node_type = _NODE_TYPE.ENT, ent_type = enty_type)
-        self.graph.add_edge(enty_type, n, edge_type = _EDGE_TYPE.META)
+        # add a node with name `n`
+        # the new node has 2 properties
+        self.graph.add_node(n, 
+            node_type = _NODE_TYPE.ENT, # the type of node, 'entity'
+            ent_type = enty_type  # the type of entity, `posi`, `vert`, etc
+        )
+        # create an edge from the node `ent_type` to the new node
+        # the new edge is given the attribute `meta`
+        # this edge is so that later the node can be found
+        self.graph.add_edge(enty_type, n, 
+            edge_type = _EDGE_TYPE.META
+        )
+        # return the name of the new entity node
         return n
 
     def _graph_attrib_node_name(self, ent_type, name):
+        """Create the name for an attrib node.
+        It will be something like this: 'att_pgons_area'.
+        """
         return 'att_' + ent_type + '_' + name
 
     def _graph_add_attrib(self, ent_type, name, data_type):
+        """Add an attribute node to the graph.
+        """
+        # create the node name, from the entity type and attribute name
         n = self._graph_attrib_node_name(ent_type, name)
-        self.graph.add_node(n, node_type = _NODE_TYPE.ATTRIB, ent_type = ent_type,
-            name = name, data_type = data_type)
-        self.graph.add_edge(ent_type + '_attribs', n, edge_type = _EDGE_TYPE.META)
+        # add the node to the graph
+        # the new node has 4 properties
+        self.graph.add_node(n, 
+            node_type = _NODE_TYPE.ATTRIB, # the type of node, 'attrib'
+            ent_type = ent_type, # the `entity_type` for this attribute, `posi`, `vert`, etc
+            name = name,  # the name of the attribute
+            data_type = data_type # the data type of this attribute
+        )
+        # create an edge from the node `ent_type_attribs` (e.g. posis_attribs) to the new attrib node
+        # the edge type is `meta`
+        self.graph.add_edge(ent_type + '_attribs', n, 
+            edge_type = _EDGE_TYPE.META
+        )
+        # create a new edge type for this attrib
+        self.graph.add_edge_type(n, graph.M2O) # many to one
+        # return the name of the new attrib node
         return n
 
     def _graph_attrib_val_node_name(self, value):
+        """Create the name for an attrib value node.
+        It will be something like this: 'val_[1,2,3]'.
+        """
         return 'val_' + str(value)
 
     def _graph_add_attrib_val(self, att_n, value):
+        """
+        Create a new attribute value node.
+
+        :param att_n: the name of the attribute node
+        :param value: the value of the attribute
+        """
+        # get the name of the attribute value node
         att_val_n = self._graph_attrib_val_node_name(value)
+        # make sure that no node with the name already exists
         if not att_val_n in self.graph.nodes:
-            self.graph.add_node(att_val_n, node_type = _NODE_TYPE.ATTRIB_VAL, value = value)
-            self.graph.add_edge(att_val_n, att_n, edge_type = _EDGE_TYPE.ATTRIB) # att_val -> att
+            # add the attrib value node
+            # the new node has 2 properties
+            self.graph.add_node(att_val_n, 
+                node_type = _NODE_TYPE.ATTRIB_VAL, # the node type, `attrib_val`
+                value = value # the node value
+            )
+            # add an edge from the attrib value to the attrib
+            self.graph.add_edge(att_val_n, att_n, 
+                edge_type = _EDGE_TYPE.ATTRIB
+            ) # att_val -> att
+        # return the name of the attrib value node
         return att_val_n
 
     # ==============================================================================================
@@ -336,6 +467,17 @@ class SIM(object):
         elif self.graph.nodes[att_n].get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
             
+    def get_attribs(self, ent_type):
+        """Get a list of attribute names in the model, specifying the entity type.
+
+        :param ent_type: The entity type for getting attributes. (See ENT_TYPE)
+        :return: A list of attrib names.
+        """
+        return map(
+            lambda att_n: self.graph.nodes[att_n].get('name'), 
+            self.graph.successors(ent_type + '_attribs', _EDGE_TYPE.META)
+        )
+
     def set_attrib_val(self, ent, att_name, att_value):
         """Set the value of an attribute, specifying the entity in the model, the attribute name and
         the attribute value. 
@@ -357,7 +499,7 @@ class SIM(object):
         if self.graph.nodes[att_n].get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
         att_val_n = self._graph_add_attrib_val(att_n, att_value)
-        self.graph.add_edge(ent, att_val_n, edge_type = _EDGE_TYPE.ATTRIB) # ent -> att_val
+        self.graph.add_edge(ent, att_val_n, edge_type = att_n) # ent -> att_val
         
     def get_attrib_val(self, ent, name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
@@ -366,15 +508,12 @@ class SIM(object):
         :param name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        # TODO this look slow!
         ent_type = self.graph.nodes[ent].get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, name)
-        att_vals_n = self.graph.successors(ent, _EDGE_TYPE.ATTRIB)
-        for att_val_n in att_vals_n:
-            atts_n = self.graph.successors(att_val_n, _EDGE_TYPE.ATTRIB)
-            if atts_n and atts_n[0] == att_n:
-                return self.graph.nodes[att_val_n].get('value')
-        return None
+        att_vals_n = self.graph.successors(ent, att_n)
+        if att_vals_n == None:
+            return None
+        return self.graph.nodes[att_vals_n].get('value')
 
     def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
@@ -385,7 +524,7 @@ class SIM(object):
         :param att_value: The attribute value to set.
         :return: No value.
         """
-        self.graph.data[att_name] = att_value
+        self.model_attribs[att_name] = att_value
 
     def get_model_attrib_val(self, att_name):
         """Get an attribute value from the model, specifying a name. Model attributes are
@@ -395,7 +534,7 @@ class SIM(object):
         :param att_name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        return self.graph.data[att_name]
+        return self.model_attribs[att_name]
 
     def get_model_attribs(self):
         """Get a list of attribute names from the model. Model attributes are
@@ -404,20 +543,11 @@ class SIM(object):
 
         :return: A list of attribute names.
         """
-        print(self.graph.data)
-        return [] # self.graph.data.keys()
+        return self.model_attribs.keys()
 
     # ==============================================================================================
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
-
-    def num_ents(self, ent_type):
-        """Get the number of entities in the model of a specific type.  
-
-        :param ent_type: The type of entity to search for in the model.
-        :return: A number of entities of the specified type in the model.
-        """
-        return self.graph.degree(ent_type, _EDGE_TYPE.META)
 
     def _get_ent_seq(self, target_ent_type, source_ent_type):
         if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
@@ -427,37 +557,6 @@ class SIM(object):
         elif (target_ent_type == ENT_TYPE.PGONS or source_ent_type == ENT_TYPE.PGONS):
             return _ENT_SEQ_COLL_PGON_POSI
         return _ENT_SEQ
-
-    def get_ents(self, target_ent_type, source_ents = None):
-        """Get entities of a specific type. A list of entity IDs is returned.
-
-        If source_ents is None, then all entities of the specified type in the model are returned.
-        If there are no entities of that type in the model, then an empty list is returned. 
-
-        If source_ents contains a list of entities, then entities will be extracted from the source
-        ents. For example, if ent_type is 'posis' and 'source_ents' is a polyline and a polygon,
-        then a list containing the positions used in the polyline and polygon are returned. 
-        Similarly, if ent_type is 'pgons' and 'source_ents' is a list of positions,
-        then a list of polygons is returned, of polygons that make use of the specified positions.
-
-        :param target_ent_type: The type of entity to get from the model.
-        :param source_ents: None, or a single entity ID or a list of entity IDs from which to get the target entities.
-        :return: A list of unique entity IDs.
-        """
-        if source_ents == None:
-            return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
-        # not a list
-        if not type(source_ents) is list:
-            return self._nav(target_ent_type, source_ents)
-        # a list with one item
-        if len(source_ents) == 1:
-            return self._nav(target_ent_type, source_ents[0])
-        # a list with multiple items
-        ents_set = OrderedDict() # ordered set
-        for source_ent in source_ents:
-            for target_ent in self._nav(target_ent_type, source_ent):
-                ents_set[target_ent] = None # ordered set
-        return list(ents_set.keys())
 
     # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
@@ -489,95 +588,44 @@ class SIM(object):
             ents = ent_set.keys()
         return target_ents_set.keys()
 
-    # def get_ents2(self, target_ent_type, source_ents = None):
-    #     """Get entities of a specific type. A list of entity IDs is returned.
+    def num_ents(self, ent_type):
+        """Get the number of entities in the model of a specific type.  
 
-    #     If source_ents is None, then all entities of the specified type in the model are returned.
-    #     If there are no entities of that type in the model, then an empty list is returned. 
+        :param ent_type: The type of entity to search for in the model.
+        :return: A number of entities of the specified type in the model.
+        """
+        return self.graph.degree(ent_type, _EDGE_TYPE.META)
 
-    #     If source_ents contains a list of entities, then entities will be extracted from the source
-    #     ents. For example, if ent_type is 'posis' and 'source_ents' is a polyline and a polygon,
-    #     then a list containing the positions used in the polyline and polygon are returned. 
-    #     Similarly, if ent_type is 'pgons' and 'source_ents' is a list of positions,
-    #     then a list of polygons is returned, of polygons that make use of the specified positions.
+    def get_ents(self, target_ent_type, source_ents = None):
+        """Get entities of a specific type. A list of entity IDs is returned.
 
-    #     :param target_ent_type: The type of entity to get from the model.
-    #     :param source_ents: None, or a single entity ID or a list of entity IDs from which to get the target entities.
-    #     :return: A list of unique entity IDs.
-    #     """
-    #     if source_ents == None:
-    #         return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
-    #     source_ents = source_ents if type(source_ents) is list else [source_ents]
-    #     ents_set = OrderedDict() # ordered set
-    #     for source_ent in source_ents:
-    #         for target_ent in self._nav2(target_ent_type, source_ent):
-    #             ents_set[target_ent] = None # ordered set
-    #     return list(ents_set.keys())
+        If source_ents is None, then all entities of the specified type in the model are returned.
+        If there are no entities of that type in the model, then an empty list is returned. 
 
-    # def _nav2(self, target_ent_type, source_ent):
-    #     source_ent_type = self.graph.nodes[source_ent].get('ent_type')
-    #     if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
-    #         return source_ent
-    #     ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
-    #     dir_down = ent_seq[source_ent_type] > ent_seq[target_ent_type]
-    #     navigate = self.graph.successors if dir_down else self.graph.predecessors
-    #     ents = [source_ent]
-    #     target_ents_set = OrderedDict()
-    #     while ents:
-    #         ent_set = OrderedDict()
-    #         for ent in ents:
-    #             for target_ent in navigate(ent, _EDGE_TYPE.ENT):
-    #                 this_ent_type = self.graph.nodes[target_ent].get('ent_type')
-    #                 if this_ent_type in ent_seq:
-    #                     if this_ent_type == target_ent_type:
-    #                         target_ents_set[target_ent] = None # orderd set
-    #                     elif ent_seq[this_ent_type] > ent_seq[target_ent_type] if dir_down else ent_seq[this_ent_type] < ent_seq[target_ent_type]:
-    #                         ent_set[target_ent] = None # orderd set
-    #         ents = ent_set.keys()
-    #     return target_ents_set.keys()
+        If source_ents contains a list of entities, then entities will be extracted from the source
+        ents. For example, if ent_type is 'posis' and 'source_ents' is a polyline and a polygon,
+        then a list containing the positions used in the polyline and polygon are returned. 
+        Similarly, if ent_type is 'pgons' and 'source_ents' is a list of positions,
+        then a list of polygons is returned, of polygons that make use of the specified positions.
 
-    # def get_ents3(self, target_ent_type, source_ents = None):
-    #     print ("get ents")
-    #     if source_ents == None:
-    #         return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
-    #     if not type(source_ents) is list:
-    #         source_ent_type = self.graph.nodes[source_ents].get('ent_type')
-    #         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
-    #         return self._nav_recursive_one(target_ent_type, source_ents, ent_seq)
-    #     ents_set = OrderedDict()
-    #     for source_ent in source_ents:
-    #         source_ent_type = self.graph.nodes[source_ent].get('ent_type')
-    #         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
-    #         for ent  in self._nav_recursive(target_ent_type, source_ent, ent_seq):
-    #             ents_set[ent] = None # ordered set
-    #     return ents_set.keys()
-
-    # def _nav_recursive_one(self, target_ent_type, source_ent, ent_seq):
-    #     source_ent_type = self.graph.nodes[source_ent].get('ent_type')
-    #     # if not source_ent_type in ent_seq:
-    #     #     print (">>", source_ent, ent_seq)
-    #     if source_ent_type == target_ent_type and source_ent_type != ENT_TYPE.COLLS:
-    #         return source_ent
-    #     dist = ent_seq[source_ent_type] - ent_seq[target_ent_type]
-    #     if dist == 1:
-    #         return self.graph.successors(source_ent, _EDGE_TYPE.ENT)
-    #     if dist == -1:
-    #         return self.graph.predecessors(source_ent, _EDGE_TYPE.ENT)
-    #     if dist > 1:
-    #         return self._nav_recursive(target_ent_type, self.graph.successors(source_ent, _EDGE_TYPE.ENT), ent_seq)
-    #     if dist < -1:
-    #         return self._nav_recursive(target_ent_type, self.graph.predecessors(source_ent, _EDGE_TYPE.ENT), ent_seq)
-
-    # def _nav_recursive(self, target_ent_type, source_ents, ent_seq):
-    #     if not type(source_ents) is list:
-    #         return self._nav_recursive_one(target_ent_type, source_ents, ent_seq)
-    #     if len(source_ents) == 1:
-    #         return self._nav_recursive_one(target_ent_type, source_ents[0], ent_seq)
-    #     ents_set = OrderedDict()
-    #     for a_source_ent in source_ents:
-    #         for ent in self._nav_recursive(target_ent_type, a_source_ent, ent_seq):
-    #             ents_set[ent] = None # ordered set
-    #     return ents_set.keys()
+        :param target_ent_type: The type of entity to get from the model.
+        :param source_ents: None, or a single entity ID or a list of entity IDs from which to get the target entities.
+        :return: A list of unique entity IDs.
+        """
+        if source_ents == None:
+            return self.graph.successors(target_ent_type, _EDGE_TYPE.META)
+        # not a list
+        if not type(source_ents) is list:
+            return self._nav(target_ent_type, source_ents)
+        # a list with one item
+        if len(source_ents) == 1:
+            return self._nav(target_ent_type, source_ents[0])
+        # a list with multiple items
+        ents_set = OrderedDict() # ordered set
+        for source_ent in source_ents:
+            for target_ent in self._nav(target_ent_type, source_ent):
+                ents_set[target_ent] = None # ordered set
+        return list(ents_set.keys())
 
     def get_point_posi(self, point):
         """Get the position ID for a point.
@@ -647,7 +695,7 @@ class SIM(object):
         nodes = '\n'.join(nodes)
         all_edges = ''
         for edge_type in self.graph.edge_types:
-            edges = map(lambda e: '- ' + e + ': ' + str(self.graph.edges[edge_type][e]), self.graph.edges[edge_type])
+            edges = map(lambda e: '- ' + e + ': ' + str(self.graph.edges_fwd[edge_type][e]), self.graph.edges_fwd[edge_type])
             edges = '\n'.join(edges)
             all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
         return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
@@ -731,7 +779,8 @@ class SIM(object):
                 data['entities'] = []
                 for att_val_n in att_vals_n:
                     data['values'].append(self.graph.nodes[att_val_n].get('value'))
-                    idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
+                    # idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
+                    idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, att_n)]
                     data['entities'].append(idxs)
                 attribs_data.append(data)
             return attribs_data
@@ -744,7 +793,7 @@ class SIM(object):
             'plines': _attribData(pline_attribs, plines_dict),
             'pgons': _attribData(pgon_attribs, pgons_dict),
             'colls': _attribData(coll_attribs, colls_dict),
-            'model': list(self.graph.data.items())
+            'model': list(self.model_attribs.items())
         }
         # create the json
         data = {

@@ -44,10 +44,10 @@ for i in range(1000):
         sm.add_coll_ent(coll, pgon)
 
 # write to str
-json = sm.to_json_str()
+json = sm.export_sim()
 # with open("test.sim", "w") as f:
 #     f.write(json)
 
 # calc time
 t1 = time.time()
-print "Time = ", t1 - t0
+print("Time = ", t1 - t0)
