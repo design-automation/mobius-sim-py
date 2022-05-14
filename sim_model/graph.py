@@ -4,13 +4,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from collections import OrderedDict
 
-# edge types
-O2O = 'o2o' # one to one
-M2M = 'm2m' # many to many
-M2O = 'm2o' # many to one
-O2M = 'o2m' # one to many
-
 class Graph(object):
+
+    # edge types
+    O2O = 'o2o' # one to one
+    M2M = 'm2m' # many to many
+    M2O = 'm2o' # many to one
+    O2M = 'o2m' # one to many
 
     # the graph is created using a sigle dict of nodes and multiple dicst of edges
     # 
@@ -65,6 +65,30 @@ class Graph(object):
             raise Exception('Node does not exist.')
         return self._nodes[n]
 
+    def get_nodes_with_edge_out(self, edge_type):
+        """
+        Get a list of nodes that have an outgoing edge of type edge_type.
+
+        :param edge_type: the edge type
+        :return: A list of node names.
+        """        
+        if not edge_type in self._edge_types :
+            raise Exception('Edge type does not exist.')
+        # get the nodes
+        return self._edges_fwd[edge_type].keys()
+
+    def get_nodes_with_edge_in(self, edge_type):
+        """
+        Get a list of nodes that have an incoming edge of type edge_type.
+
+        :param edge_type: the edge type
+        :return: A list of node names.
+        """        
+        if not edge_type in self._edge_types :
+            raise Exception('Edge type does not exist.')
+        # get the nodes
+        return self._edges_rev[edge_type].keys()
+
     def has_node(self, n):
         """
         Return True if the node n exists in the graph.
@@ -89,7 +113,7 @@ class Graph(object):
             raise Exception('Edge type does not exist.')
         x2x = self._edge_types[edge_type]
         # add edge from n0 to n1
-        if x2x in [M2M, O2M]:
+        if x2x in [self.M2M, self.O2M]:
             if n0 in self._edges_fwd[edge_type]:
                 self._edges_fwd[edge_type][n0].append( n1 )
             else:
@@ -97,7 +121,7 @@ class Graph(object):
         else:
             self._edges_fwd[edge_type][n0] = n1
         # add rev edge from n1 to n0
-        if x2x in [M2M, M2O]:
+        if x2x in [self.M2M, self.M2O]:
             if n1 in self._edges_rev[edge_type]:
                 self._edges_rev[edge_type][n1].append( n0 )
             else:
@@ -121,7 +145,7 @@ class Graph(object):
         if not n0 in self._edges_fwd[edge_type]:
             return False
         x2x = self._edge_types[edge_type]
-        if x2x in [M2M, O2M]:
+        if x2x in [self.M2M, self.O2M]:
             return n1 in self._edge_types[edge_type][n0]
         else:
             return self._edges_fwd[edge_type][n0] == n1
@@ -161,7 +185,7 @@ class Graph(object):
             raise Exception('Edge type does not exist.')
         x2x = self._edge_types[edge_type]
         if n not in self._edges_fwd[edge_type]:
-            if x2x in [M2M, O2M]:
+            if x2x in [self.M2M, self.O2M]:
                 return []
             else:
                 return None
@@ -188,7 +212,7 @@ class Graph(object):
             raise Exception('Edge type does not exist.')
         x2x = self._edge_types[edge_type]
         if n not in self._edges_rev[edge_type]:
-            if x2x in [M2M, M2O]:
+            if x2x in [self.M2M, self.M2O]:
                 return []
             else:
                 return None
@@ -211,7 +235,7 @@ class Graph(object):
         # calc reverse degree
         if n not in self._edges_rev[edge_type]:
             rev_deg = 0
-        elif x2x in [M2M, M2O]:
+        elif x2x in [self.M2M, self.M2O]:
             rev_deg = len(self._edges_rev[edge_type][n])
         else:
             rev_deg = 1
@@ -235,7 +259,7 @@ class Graph(object):
         # calc forward degree
         if n not in self._edges_fwd[edge_type]:
             fwd_deg = 0
-        elif x2x in [M2M, O2M]:
+        elif x2x in [self.M2M, self.O2M]:
             fwd_deg = len(self._edges_fwd[edge_type][n])
         else:
             fwd_deg = 1
@@ -252,3 +276,5 @@ class Graph(object):
         """
         # return result
         return self.degree_in(n, edge_type) + self.degree_out(n, edge_type)
+
+

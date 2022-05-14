@@ -8,7 +8,7 @@ if sys.version_info[0] >= 3:
     unicode = str
 from collections import OrderedDict
 import json
-from sim_model import graph
+from sim_model.graph import Graph
 
 # ==================================================================================================
 # TODO
@@ -149,17 +149,22 @@ class SIM(object):
         """
 
        # graph
-        self.graph = graph.Graph()
-        self.graph.add_edge_type(_EDGE_TYPE.ENT, graph.M2M) # many to many
-        self.graph.add_edge_type(_EDGE_TYPE.ATTRIB, graph.M2O) # many to one
-        self.graph.add_edge_type(_EDGE_TYPE.META, graph.O2M) # one to many
+        self.graph = Graph()
+        self.graph.add_edge_type(_EDGE_TYPE.ENT, Graph.M2M) # many to many
+        self.graph.add_edge_type(_EDGE_TYPE.ATTRIB, Graph.M2O) # many to one
+        self.graph.add_edge_type(_EDGE_TYPE.META, Graph.O2M) # one to many
 
         # create meta nodes
-        meta = [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
+        meta_nodes = [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
             ENT_TYPE.POINTS, ENT_TYPE.PLINES, ENT_TYPE.PGONS, ENT_TYPE.COLLS]
-        for ent_type in meta:
-            self.graph.add_node(ent_type, node_type = _NODE_TYPE.META)
-            self.graph.add_node(ent_type + '_attribs', node_type = _NODE_TYPE.META)
+        for meta_node in meta_nodes:
+            self.graph.add_node(
+                meta_node, 
+                node_type = _NODE_TYPE.META)
+            self.graph.add_node(
+                self._graph_ent_attribs_node_name(meta_node),
+                node_type = _NODE_TYPE.META
+            )
 
         # add xyz attrib
         self._graph_add_attrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
@@ -191,7 +196,7 @@ class SIM(object):
     """
     The nodes for entities are:
     
-    - ent nodes 
+    - ent nodes
       - e.g. 'ps01', '_v123'
       - node_type = 'entity'
 
@@ -201,17 +206,17 @@ class SIM(object):
 
     The nodes for attribs are:
 
-    - ent_type_attribs nodes 
-      - e.g.'pgons_attribs'
+    - _atts_ent_type nodes 
+      - e.g.'_atts_pgons'
       - node_type = 'meta'
 
-    - att_ent_type_name nodes 
-      - e.g. 'att_pgons_area'
+    - _att_ent_type_name nodes 
+      - e.g. '_att_pgons_area'
       - node_type = 'attrib'
 
-    - attrib_val nodes 
+    - _att_val nodes 
       - e.g. 'val_[1,2,3]'
-      - node_type = 'attrib_val'
+      - node_type = '_att_val'
 
     The forward edges are as follows:
     
@@ -234,7 +239,7 @@ class SIM(object):
       - edge_type = 'meta'
       - one to many
 
-    Edges of type 'attrib':
+    Edges of type 'att':
 
     - attrib_val -> att_ent_type_name 
       - e.g. val_123 -> att_pgons_area
@@ -245,12 +250,28 @@ class SIM(object):
 
     - ent -> attrib_val 
       - pg0 -> val_123
-      - edge_type = att_ent_type_name e.g. 'att_pgons_area'
+      - edge_type = att_ent_type_name e.g. '_att_pgons_area'
       - many to one
 
     For each forward edge, there is an equivalent reverse edge.
 
     """
+    def _graph_ent_attribs_node_name(self, ent_type):
+        """Create the name for an attrib node.
+        It will be something like this: '_atts_pgons'.
+        """
+        return '_atts_' + ent_type
+    def _graph_attrib_node_name(self, ent_type, att_name):
+        """Create the name for an attrib node.
+        It will be something like this: '_att_pgons_area'.
+        """
+        return '_att_' + ent_type + '_' + att_name
+
+    def _graph_attrib_val_node_name(self, value):
+        """Create the name for an attrib value node.
+        It will be something like this: '_val_[1,2,3]'.
+        """
+        return '_val_' + str(value)
 
     def _graph_add_ent(self, enty_type):
         """Add an entity node to the graph. 
@@ -276,20 +297,15 @@ class SIM(object):
         # return the name of the new entity node
         return n
 
-    def _graph_attrib_node_name(self, ent_type, name):
-        """Create the name for an attrib node.
-        It will be something like this: 'att_pgons_area'.
-        """
-        return 'att_' + ent_type + '_' + name
-
     def _graph_add_attrib(self, ent_type, name, data_type):
         """Add an attribute node to the graph.
         """
         # create the node name, from the entity type and attribute name
-        n = self._graph_attrib_node_name(ent_type, name)
+        att_n = self._graph_attrib_node_name(ent_type, name)
         # add the node to the graph
         # the new node has 4 properties
-        self.graph.add_node(n, 
+        self.graph.add_node(
+            att_n, 
             node_type = _NODE_TYPE.ATTRIB, # the type of node, 'attrib'
             ent_type = ent_type, # the `entity_type` for this attribute, `posi`, `vert`, etc
             name = name,  # the name of the attribute
@@ -297,23 +313,19 @@ class SIM(object):
         )
         # create an edge from the node `ent_type_attribs` (e.g. posis_attribs) to the new attrib node
         # the edge type is `meta`
-        self.graph.add_edge(ent_type + '_attribs', n, 
+        self.graph.add_edge(
+            self._graph_ent_attribs_node_name(ent_type), 
+            att_n, 
             edge_type = _EDGE_TYPE.META
         )
         # create a new edge type for this attrib
-        self.graph.add_edge_type(n, graph.M2O) # many to one
+        self.graph.add_edge_type(att_n, Graph.M2O) # many to one
         # return the name of the new attrib node
-        return n
-
-    def _graph_attrib_val_node_name(self, value):
-        """Create the name for an attrib value node.
-        It will be something like this: 'val_[1,2,3]'.
-        """
-        return 'val_' + str(value)
+        return att_n
 
     def _graph_add_attrib_val(self, att_n, value):
         """
-        Create a new attribute value node.
+        Add an attribute value node to the graph.
 
         :param att_n: the name of the attribute node
         :param value: the value of the attribute
@@ -468,6 +480,16 @@ class SIM(object):
         elif self.graph.get_node(att_n).get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
             
+    def has_attrib(self, ent_type, att_name):
+        """Returns true if an attribute exists with the specified entity type and name.
+
+        :param ent_type: The entity type for getting attributes. (See ENT_TYPE)
+        :param att_name: The name of the attribute. 
+        :return: True is the attribute exists, false otherwise.
+        """
+        att_n = self._graph_attrib_node_name(ent_type, att_name)
+        return self.graph.has_node(att_n)
+
     def get_attribs(self, ent_type):
         """Get a list of attribute names in the model, specifying the entity type.
 
@@ -476,7 +498,10 @@ class SIM(object):
         """
         return map(
             lambda att_n: self.graph.get_node(att_n).get('name'), 
-            self.graph.successors(ent_type + '_attribs', _EDGE_TYPE.META)
+            self.graph.successors(
+                self._graph_ent_attribs_node_name(ent_type),
+                _EDGE_TYPE.META
+            )
         )
 
     def set_attrib_val(self, ent, att_name, att_value):
@@ -500,7 +525,7 @@ class SIM(object):
         if self.graph.get_node(att_n).get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
         att_val_n = self._graph_add_attrib_val(att_n, att_value)
-        self.graph.add_edge(ent, att_val_n, edge_type = att_n) # ent -> att_val
+        self.graph.add_edge(ent, att_val_n, att_n) # ent -> att_val
         
     def get_attrib_val(self, ent, name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
@@ -683,6 +708,82 @@ class SIM(object):
         end = self.graph.successors(self.graph.successors(edges[-1], _EDGE_TYPE.ENT)[1], _EDGE_TYPE.ENT)
         return start == end
 
+    def query(self, ent_type, att_name, comparator, att_val):
+        """Find entities in the model that satisy the query condition.
+
+        :param ent_type: The entity type for getting attributes. (See ENT_TYPE)
+        :param att_name: The name of the attribute. 
+        :param comparator: The operator to use to compare value, can be:
+        '==', '!=', '<', '<=', '>', '>='.
+        :param att_val: The value of the attribute. 
+        :return: A list of entities.
+        """
+        #if attrib does not exist, throw error
+        att_n = self._graph_attrib_node_name(ent_type, att_name)
+        if not self.graph.has_node(att_n):
+            raise Exception("The attribute does not exist: '" + att_name + "'.")
+        # val == None
+        if comparator == '==' and att_val == None:
+            set_with_val = set(self.graph.get_nodes_with_edge_out(att_n))
+            set_all = set(self.graph.successors(ent_type, _EDGE_TYPE.META))
+            return list(set_all - set_with_val)
+        # val != None
+        if comparator == '!=' and att_val == None:
+            return self.graph.get_nodes_with_edge_out(att_n)
+        # val == att_val
+        if comparator == '==':
+            att_val_n = self._graph_attrib_val_node_name(att_val)
+            if not self.graph.has_node(att_val_n):
+                return []
+            return self.graph.predecessors(att_val_n, att_n)
+        # val != att_val
+        if comparator == '!=':
+            att_val_n = self._graph_attrib_val_node_name(att_val)
+            if not self.graph.has_node(att_val_n):
+                return self.graph.successors(ent_type, _EDGE_TYPE.META)
+            ents_equal = self.graph.predecessors(att_val_n, att_n)
+            if len(ents_equal) == 0:
+                return self.graph.successors(ent_type, _EDGE_TYPE.META)
+            set_equal = set(ents_equal)
+            set_all = set(self.graph.successors(ent_type, _EDGE_TYPE.META))
+            return list(set_all - set_equal)
+        # other cases, data_type must be a number
+        data_type = self.graph.get_node(att_n).get('data_type')
+        if data_type != DATA_TYPE.NUM:
+            raise Exception("The '" + comparator +
+                "' comparator cannot be used with attributes of type '" + data_type + "'.")
+        result = []
+        # val < att_val
+        if comparator == '<':
+            result = []
+            for ent in self.graph.successors(ent_type, _EDGE_TYPE.META):
+                val_n = self.graph.successors(ent, att_n)
+                if val_n != None and self.graph.get_node(val_n).get('value') < att_val:
+                    result.append(ent)
+        # val <= att_val
+        if comparator == '<=':
+            result = []
+            for ent in self.graph.successors(ent_type, _EDGE_TYPE.META):
+                val_n = self.graph.successors(ent, att_n)
+                if val_n != None and self.graph.get_node(val_n).get('value') <= att_val:
+                    result.append(ent)
+        # val > att_val
+        if comparator == '>':
+            result = []
+            for ent in self.graph.successors(ent_type, _EDGE_TYPE.META):
+                val_n = self.graph.successors(ent, att_n)
+                if val_n != None and self.graph.get_node(val_n).get('value') > att_val:
+                    result.append(ent)
+        # val >= att_val
+        if comparator == '>=':
+            result = []
+            for ent in self.graph.successors(ent_type, _EDGE_TYPE.META):
+                val_n = self.graph.successors(ent, att_n)
+                if val_n != None and self.graph.get_node(val_n).get('value') >= att_val:
+                    result.append(ent)
+        # return list of entities
+        # TODO handle queries sub-entities in lists and dicts
+        return result
     # ==============================================================================================
     # EXPORT
     # ==============================================================================================
@@ -763,14 +864,22 @@ class SIM(object):
                 elif ent_type == ENT_TYPE.COLLS:
                     geometry['coll_colls'][-1].append(colls_dict[ent])
         # get attribs from graph
-        posi_attribs = self.graph.successors(ENT_TYPE.POSIS + '_attribs', _EDGE_TYPE.META)
-        vert_attribs = self.graph.successors(ENT_TYPE.VERTS + '_attribs', _EDGE_TYPE.META)
-        edge_attribs = self.graph.successors(ENT_TYPE.EDGES + '_attribs', _EDGE_TYPE.META)
-        wire_attribs = self.graph.successors(ENT_TYPE.WIRES + '_attribs', _EDGE_TYPE.META)
-        point_attribs = self.graph.successors(ENT_TYPE.POINTS + '_attribs', _EDGE_TYPE.META)
-        pline_attribs = self.graph.successors(ENT_TYPE.PLINES + '_attribs', _EDGE_TYPE.META)
-        pgon_attribs = self.graph.successors(ENT_TYPE.PGONS + '_attribs', _EDGE_TYPE.META)
-        coll_attribs = self.graph.successors(ENT_TYPE.COLLS + '_attribs', _EDGE_TYPE.META)
+        posi_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.POSIS), _EDGE_TYPE.META)
+        vert_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.VERTS), _EDGE_TYPE.META)
+        edge_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.EDGES), _EDGE_TYPE.META)
+        wire_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.WIRES), _EDGE_TYPE.META)
+        point_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.POINTS), _EDGE_TYPE.META)
+        pline_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.PLINES), _EDGE_TYPE.META)
+        pgon_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.PGONS), _EDGE_TYPE.META)
+        coll_attribs = self.graph.successors(
+            self._graph_ent_attribs_node_name(ENT_TYPE.COLLS), _EDGE_TYPE.META)
         # create the attribute data
         def _attribData(attribs, ent_dict):
             attribs_data = []
