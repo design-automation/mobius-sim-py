@@ -4,14 +4,16 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from collections import OrderedDict
 
+# ==================================================================================================
+# GRAPH CLASS
+# ==================================================================================================
 class Graph(object):
-
     # edge types
     O2O = 'o2o' # one to one
     M2M = 'm2m' # many to many
     M2O = 'm2o' # many to one
     O2M = 'o2m' # one to many
-
+    # ----------------------------------------------------------------------------------------------
     # the graph is created using a sigle dict of nodes and multiple dicst of edges
     # 
     # for each edge type, there are two dicts, forward and reverse
@@ -39,11 +41,9 @@ class Graph(object):
         self._edge_types = OrderedDict() # key is edge_type, value is x2x
         self._edges_fwd = OrderedDict() # key is the edge_type, value is a dict of edges 
         self._edges_rev = OrderedDict() # key is the edge_type, value is a dict of edges 
-
     # ==============================================================================================
     # METHODS
     # ==============================================================================================
-
     def add_node(self, n, **attribs):
         """
         Add a node to the graph.
@@ -53,7 +53,7 @@ class Graph(object):
         :return: No value.
         """
         self._nodes[n] = attribs
-
+    # ----------------------------------------------------------------------------------------------
     def get_node(self, n):
         """
         Get a node from the graph.
@@ -64,7 +64,7 @@ class Graph(object):
         if not n in self._nodes:
             raise Exception('Node does not exist.')
         return self._nodes[n]
-
+    # ----------------------------------------------------------------------------------------------
     def get_nodes_with_edge_out(self, edge_type):
         """
         Get a list of nodes that have an outgoing edge of type edge_type.
@@ -76,7 +76,7 @@ class Graph(object):
             raise Exception('Edge type does not exist.')
         # get the nodes
         return self._edges_fwd[edge_type].keys()
-
+    # ----------------------------------------------------------------------------------------------
     def get_nodes_with_edge_in(self, edge_type):
         """
         Get a list of nodes that have an incoming edge of type edge_type.
@@ -88,7 +88,7 @@ class Graph(object):
             raise Exception('Edge type does not exist.')
         # get the nodes
         return self._edges_rev[edge_type].keys()
-
+    # ----------------------------------------------------------------------------------------------
     def has_node(self, n):
         """
         Return True if the node n exists in the graph.
@@ -97,7 +97,7 @@ class Graph(object):
         :return: True or False
         """
         return n in self._nodes
-
+    # ----------------------------------------------------------------------------------------------
     def add_edge(self, n0, n1, edge_type):
         """
         Add an edge to the graph, from node 0 to node 1.
@@ -128,7 +128,7 @@ class Graph(object):
                 self._edges_rev[edge_type][n1] = [n0]
         else:
             self._edges_rev[edge_type][n1] = n0
-
+    # ----------------------------------------------------------------------------------------------
     def has_edge(self, n0, n1, edge_type):
         """
         Return True if an edge from n0 to n1 exists in the graph.
@@ -149,7 +149,7 @@ class Graph(object):
             return n1 in self._edge_types[edge_type][n0]
         else:
             return self._edges_fwd[edge_type][n0] == n1
-
+    # ----------------------------------------------------------------------------------------------
     def add_edge_type(self, edge_type, x2x):
         """
         Add an edge type to the graph.
@@ -163,7 +163,7 @@ class Graph(object):
         self._edge_types[edge_type] = x2x
         self._edges_fwd[edge_type] = OrderedDict()
         self._edges_rev[edge_type] = OrderedDict()
-
+    # ----------------------------------------------------------------------------------------------
     def successors(self, n, edge_type):
         """
         Get the successors of a node in the graph.
@@ -190,7 +190,7 @@ class Graph(object):
             else:
                 return None
         return self._edges_fwd[edge_type][n]
-
+    # ----------------------------------------------------------------------------------------------
     def predecessors(self, n, edge_type):
         """
         Get the predecessors of a node in the graph.
@@ -217,7 +217,7 @@ class Graph(object):
             else:
                 return None
         return self._edges_rev[edge_type][n]
-
+    # ----------------------------------------------------------------------------------------------
     def degree_in(self, n, edge_type):
         """
         Count the the number of incoming edges.
@@ -241,7 +241,7 @@ class Graph(object):
             rev_deg = 1
         # return result
         return rev_deg
-
+    # ----------------------------------------------------------------------------------------------
     def degree_out(self, n, edge_type):
         """
         Count the the number of outgoing edges.
@@ -265,7 +265,7 @@ class Graph(object):
             fwd_deg = 1
         # return result
         return fwd_deg
-
+    # ----------------------------------------------------------------------------------------------
     def degree(self, n, edge_type):
         """
         Count the the total number of incoming and outgoing edges.
@@ -276,5 +276,7 @@ class Graph(object):
         """
         # return result
         return self.degree_in(n, edge_type) + self.degree_out(n, edge_type)
-
+# ==================================================================================================
+# END GRAPH CLASS
+# ==================================================================================================
 
