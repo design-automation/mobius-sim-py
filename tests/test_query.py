@@ -52,5 +52,20 @@ class TestAttribs(unittest.TestCase):
         result = self.model.query(ENT_TYPE.POINTS, 'some_number', '<=', 60)
         self.assertEqual(list(result), ['pt1'])
 
+        
+    def test_query_none(self):
+        result = self.model.query(ENT_TYPE.POSIS, 'xyz', '==', None)
+        self.assertEqual(list(result), [])
+        result = self.model.query(ENT_TYPE.POINTS, 'some_str', '!=', None)
+        self.assertEqual(list(result), ['pt0'])
+        result = self.model.query(ENT_TYPE.POINTS, 'some_str', '==', None)
+        result.sort()
+        self.assertEqual(list(result), ['pt1', 'pt2'])
+        result = self.model.query(ENT_TYPE.POINTS, 'some_number', '!=', None)
+        self.assertEqual(list(result), ['pt1'])
+        result = self.model.query(ENT_TYPE.POINTS, 'some_number', '==', None)
+        result.sort()
+        self.assertEqual(list(result), ['pt0', 'pt2'])
+
 if __name__ == '__main__':
     unittest.main()
