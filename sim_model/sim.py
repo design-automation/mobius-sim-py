@@ -22,11 +22,9 @@ from sim_model.graph import Graph
 # ==================================================================================================
 # Constants
 # ==================================================================================================
-
-# ENT_TYPE
-class ENT_TYPE(object):
+class ENT_TYPE(Enum):
     """
-    A class that defines a set of constants for different entity types. 
+    An Enum class that defines a set of constants for different entity types. 
     These types are used when adding an attrbute to the model.
     """
     POSIS = 'posis'
@@ -38,11 +36,10 @@ class ENT_TYPE(object):
     PGONS = 'pgons'
     COLLS = 'colls'
     MODEL = 'model'
-
-# DATA_TYPE
+# --------------------------------------------------------------------------------------------------
 class DATA_TYPE(Enum):
     """
-    A class that defines a set of constants for possible data types for attributes. 
+    An Enum class that defines a set of constants for possible data types for attributes. 
     These types are used when adding an attrbute to the model.
     """
     NUM = 'number'
@@ -50,7 +47,6 @@ class DATA_TYPE(Enum):
     BOOL =  'boolean'
     LIST =  'list'
     DICT =  'dict'
-
     def get(value):
         if value == DATA_TYPE.NUM.value:
             return DATA_TYPE.NUM
@@ -62,12 +58,9 @@ class DATA_TYPE(Enum):
             return DATA_TYPE.LIST
         if value == DATA_TYPE.DICT.value:
             return DATA_TYPE.DICT
-
-
 # ==================================================================================================
 # Class for reading and writing Spatial Information Models
 # ==================================================================================================
-
 class SIM(object):
     """
     A class for creating Spatial Information Models (SIM models).
@@ -87,7 +80,8 @@ class SIM(object):
     - Polygon objects cotain vertices, edges and multiple wires. The first wire specifies the 
       polygon boundary. Subsequent wires spcify the polygon holes.
     """
-    # Node in te graph that links to all ents
+    # ----------------------------------------------------------------------------------------------
+    # Node in the graph that links to all ents
     class _GRAPH_ENTS_NODE(Enum):
         POSIS = '_ents_posis'
         VERTS = '_ents_verts'
@@ -98,7 +92,7 @@ class SIM(object):
         PGONS = '_ents_pgons'
         COLLS = '_ents_colls'
         MODEL = '_ents_model'
-
+    # ----------------------------------------------------------------------------------------------
     # node in the graph that links to all attribs
     class _GRAPH_ATTRIBS_NODE(Enum):
         POSIS = '_atts_posis'
@@ -110,24 +104,25 @@ class SIM(object):
         PGONS = '_atts_pgons'
         COLLS = '_atts_colls'
         MODEL = '_atts_model'
-
+    # ----------------------------------------------------------------------------------------------
     # types of edges in the graph
     class _GRAPH_EDGE_TYPE(Enum):
         ENT = 'entity'
         ATTRIB =  'attrib'
         META = 'meta'
-
+    # ----------------------------------------------------------------------------------------------
     # ENT PREFIX
     _ENT_PREFIX = {
-        'posis':  'ps',
-        'verts': '_v',
-        'edges': '_e',
-        'wires': '_w',
-        'points': 'pt',
-        'plines': 'pl',
-        'pgons': 'pg',
-        'colls': 'co'
+        ENT_TYPE.POSIS:  'ps',
+        ENT_TYPE.VERTS: '_v',
+        ENT_TYPE.EDGES: '_e',
+        ENT_TYPE.WIRES: '_w',
+        ENT_TYPE.POINTS: 'pt',
+        ENT_TYPE.PLINES: 'pl',
+        ENT_TYPE.PGONS: 'pg',
+        ENT_TYPE.COLLS: 'co'
     }
+    # ----------------------------------------------------------------------------------------------
     # ENT_TYPES FOR COLLECTIONS
     _COLL_ENT_TYPES = [
         ENT_TYPE.POINTS, 
@@ -135,6 +130,7 @@ class SIM(object):
         ENT_TYPE.PGONS, 
         ENT_TYPE.COLLS
     ]
+    # ----------------------------------------------------------------------------------------------
     _ENT_SEQ = {
         ENT_TYPE.POSIS: 0,
         ENT_TYPE.VERTS: 1,
@@ -145,12 +141,14 @@ class SIM(object):
         ENT_TYPE.PGONS: 4,
         ENT_TYPE.COLLS: 5
     }
+    # ----------------------------------------------------------------------------------------------
     _ENT_SEQ_COLL_POINT_POSI = {
         ENT_TYPE.POSIS: 0,
         ENT_TYPE.VERTS: 1,
         ENT_TYPE.POINTS: 2,
         ENT_TYPE.COLLS: 3
     }
+    # ----------------------------------------------------------------------------------------------
     _ENT_SEQ_COLL_PLINE_POSI = {
         ENT_TYPE.POSIS: 0,
         ENT_TYPE.VERTS: 1,
@@ -159,6 +157,7 @@ class SIM(object):
         ENT_TYPE.PLINES: 4,
         ENT_TYPE.COLLS: 5
     }
+    # ----------------------------------------------------------------------------------------------
     _ENT_SEQ_COLL_PGON_POSI = {
         ENT_TYPE.POSIS: 0,
         ENT_TYPE.VERTS: 1,
@@ -168,48 +167,34 @@ class SIM(object):
         ENT_TYPE.COLLS: 5
     }
     # ==============================================================================================
-    # CONSTRUCTOR
+    # CONSTRUCTOR FOR SIM CLASS
     # ==============================================================================================
-
     def __init__(self):
         """Constructor for creating a new empty model
         """
-
        # graph
         self.graph = Graph()
         self.graph.add_edge_type(self._GRAPH_EDGE_TYPE.ENT, Graph.M2M) # many to many
         self.graph.add_edge_type(self._GRAPH_EDGE_TYPE.ATTRIB, Graph.M2O) # many to one
         self.graph.add_edge_type(self._GRAPH_EDGE_TYPE.META, Graph.O2M) # one to many
-
-        # create meta nodes
-        meta_nodes = [
-            ENT_TYPE.POSIS, 
-            ENT_TYPE.VERTS, 
-            ENT_TYPE.EDGES, 
-            ENT_TYPE.WIRES, 
-            ENT_TYPE.POINTS, 
-            ENT_TYPE.PLINES, 
-            ENT_TYPE.PGONS, 
-            ENT_TYPE.COLLS
-        ]
-        for meta_node in meta_nodes:
+        # create nodes for ents and attribs
+        for ent_type in ENT_TYPE:
+            if ent_type == ENT_TYPE.MODEL:
+                continue
             self.graph.add_node(
-                meta_node
+                self._GRAPH_ENTS_NODE[ent_type.name]
+                # ent_type
             )
             self.graph.add_node(
-                self._graph_ent_attribs_node_name(meta_node)
+                self._GRAPH_ATTRIBS_NODE[ent_type.name]
             )
-
         # add xyz attrib
         self._graph_add_attrib(ENT_TYPE.POSIS, 'xyz', DATA_TYPE.LIST)
-
-        # model attrbutes
+        # add empty model attrbutes
         self.model_attribs = {}
-
     # ==============================================================================================
     # UTILITY 
     # ==============================================================================================
-
     def _check_type(self, value):
         val_type = type(value)
         if val_type == int or val_type == float:
@@ -223,7 +208,6 @@ class SIM(object):
         if val_type == dict:
             return DATA_TYPE.DICT
         raise Exception('Data type is not recognised:', str(value), type(value))
-
     # ==============================================================================================
     # PRIVATE GRAPH METHODS
     # ==============================================================================================
@@ -285,31 +269,31 @@ class SIM(object):
     For each forward edge, there is an equivalent reverse edge.
 
     """
-    def _graph_ent_attribs_node_name(self, ent_type):
-        """Create the name for an attrib node.
-        It will be something like this: '_atts_pgons'.
-        """
-        return '_atts_' + ent_type
+    # ----------------------------------------------------------------------------------------------
     def _graph_attrib_node_name(self, ent_type, att_name):
         """Create the name for an attrib node.
         It will be something like this: '_att_pgons_area'.
         """
-        return '_att_' + ent_type + '_' + att_name
-
-    def _graph_attrib_val_node_name(self, value):
+        return '_att_' + ent_type.value + '_' + att_name
+    # ----------------------------------------------------------------------------------------------
+    def _graph_attrib_val_node_name(self, att_val, att_n):
         """Create the name for an attrib value node.
         It will be something like this: '_val_[1,2,3]'.
         """
-        return '_val_' + str(value)
-
+        data_type = self.graph.get_node(att_n).get('data_type')
+        if data_type == DATA_TYPE.NUM or data_type == DATA_TYPE.STR:
+            return att_val
+        return str(att_val)
+    # ----------------------------------------------------------------------------------------------
     def _graph_add_ent(self, ent_type):
         """Add an entity node to the graph. 
         The entity can be a posi, vert, edge, wire, point, pline, pgon, coll.
         The entity node will have a name.
         The entity_type node wil be connected to the entity node.
         """
+        ent_type_n = self._GRAPH_ENTS_NODE[ent_type.name]
         # create the node name, from prefix and then next count number
-        ent_i = self.graph.degree_out(ent_type, edge_type = self._GRAPH_EDGE_TYPE.META)
+        ent_i = self.graph.degree_out(ent_type_n, edge_type = self._GRAPH_EDGE_TYPE.META)
         n = self._ENT_PREFIX[ent_type] + str(ent_i)
         # add a node with name `n`
         # the new node has 1 property
@@ -319,12 +303,12 @@ class SIM(object):
         # create an edge from the node `ent_type` to the new node
         # the new edge is given the attribute `meta`
         # this edge is so that later the node can be found
-        self.graph.add_edge(ent_type, n, 
+        self.graph.add_edge(ent_type_n, n, 
             edge_type = self._GRAPH_EDGE_TYPE.META
         )
         # return the name of the new entity node
         return n
-
+    # ----------------------------------------------------------------------------------------------
     def _graph_add_attrib(self, ent_type, name, data_type):
         """Add an attribute node to the graph.
         """
@@ -341,7 +325,7 @@ class SIM(object):
         # create an edge from the node `ent_type_attribs` (e.g. posis_attribs) to the new attrib node
         # the edge type is `meta`
         self.graph.add_edge(
-            self._graph_ent_attribs_node_name(ent_type), 
+            self._GRAPH_ATTRIBS_NODE[ent_type.name], 
             att_n, 
             edge_type = self._GRAPH_EDGE_TYPE.META
         )
@@ -349,8 +333,8 @@ class SIM(object):
         self.graph.add_edge_type(att_n, Graph.M2O) # many to one
         # return the name of the new attrib node
         return att_n
-
-    def _graph_add_attrib_val(self, att_n, value):
+    # ----------------------------------------------------------------------------------------------
+    def _graph_add_attrib_val(self, att_n, att_val):
         """
         Add an attribute value node to the graph.
 
@@ -358,13 +342,13 @@ class SIM(object):
         :param value: the value of the attribute
         """
         # get the name of the attribute value node
-        att_val_n = self._graph_attrib_val_node_name(value)
+        att_val_n = self._graph_attrib_val_node_name(att_val, att_n)
         # make sure that no node with the name already exists
         if not self.graph.has_node(att_val_n):
             # add the attrib value node
             # the new node has 1 property
             self.graph.add_node(att_val_n, 
-                value = value # the node value
+                value = att_val # the node value
             )
             # add an edge from the attrib value to the attrib
             self.graph.add_edge(att_val_n, att_n, 
@@ -372,11 +356,9 @@ class SIM(object):
             ) # att_val -> att
         # return the name of the attrib value node
         return att_val_n
-
     # ==============================================================================================
     # ADD METHODS FOR ENTITIES
     # ==============================================================================================
-
     def add_posi(self, xyz):
         """Add a position to the model, specifying the XYZ coordinates.
 
@@ -386,7 +368,7 @@ class SIM(object):
         posi_n = self._graph_add_ent(ENT_TYPE.POSIS)
         self.set_attrib_val(posi_n, "xyz", xyz)
         return posi_n
-
+    # ----------------------------------------------------------------------------------------------
     def add_point(self, posi):
         """Add a point object to the model, specifying a single position.
 
@@ -398,7 +380,7 @@ class SIM(object):
         self.graph.add_edge(vert_n, posi, edge_type = self._GRAPH_EDGE_TYPE.ENT)
         self.graph.add_edge(point_n, vert_n, edge_type = self._GRAPH_EDGE_TYPE.ENT)
         return point_n
-
+    # ----------------------------------------------------------------------------------------------
     def add_pline(self, posis, closed):
         """Add a polyline object to the model, specifying a list of positions.
 
@@ -433,7 +415,7 @@ class SIM(object):
         self.graph.add_edge(pline_n, wire_n, edge_type = self._GRAPH_EDGE_TYPE.ENT)
         #  return
         return pline_n
-
+    # ----------------------------------------------------------------------------------------------
     def add_pgon(self, posis):
         """Add a polygon object to the model, specifying a list of positions.
 
@@ -465,14 +447,14 @@ class SIM(object):
         self.graph.add_edge(pgon_n, wire_n, edge_type = self._GRAPH_EDGE_TYPE.ENT)
         #  return
         return pgon_n
-
+    # ----------------------------------------------------------------------------------------------
     def add_coll(self):
         """Add a new empty collection to the model.
 
         :return: The ID of the collection.
         """
         return self._graph_add_ent(ENT_TYPE.COLLS)
-
+    # ----------------------------------------------------------------------------------------------
     def add_coll_ent(self, coll, ent):
         """Add an entity to an existing collection in the model.
         Collections can contain points, polylines, polygons, and other collections.
@@ -486,11 +468,9 @@ class SIM(object):
         if ent_type not in self._COLL_ENT_TYPES:
             raise Exception('Invalid entitiy for collections.')
         self.graph.add_edge(coll, ent, edge_type = self._GRAPH_EDGE_TYPE.ENT)
-
     # ==============================================================================================
     # ATTRIBUTE METHODS
     # ==============================================================================================
-        
     def add_attrib(self, ent_type, att_name, att_data_type):
         """Create a new attribute in the model, specifying the entity type, the attribute name, and
         the data type. Note that for each entity type, the attribute name must be a unique name.
@@ -505,7 +485,7 @@ class SIM(object):
             self._graph_add_attrib(ent_type, att_name, att_data_type)
         elif self.graph.get_node(att_n).get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
-            
+    # ----------------------------------------------------------------------------------------------
     def has_attrib(self, ent_type, att_name):
         """Returns true if an attribute exists with the specified entity type and name.
 
@@ -515,7 +495,7 @@ class SIM(object):
         """
         att_n = self._graph_attrib_node_name(ent_type, att_name)
         return self.graph.has_node(att_n)
-
+    # ----------------------------------------------------------------------------------------------
     def get_attribs(self, ent_type):
         """Get a list of attribute names in the model, specifying the entity type.
 
@@ -525,11 +505,11 @@ class SIM(object):
         return map(
             lambda att_n: self.graph.get_node(att_n).get('name'), 
             self.graph.successors(
-                self._graph_ent_attribs_node_name(ent_type),
+                self._GRAPH_ATTRIBS_NODE[ent_type.name],
                 self._GRAPH_EDGE_TYPE.META
             )
         )
-
+    # ----------------------------------------------------------------------------------------------
     def set_attrib_val(self, ent, att_name, att_value):
         """Set the value of an attribute, specifying the entity in the model, the attribute name and
         the attribute value. 
@@ -552,7 +532,7 @@ class SIM(object):
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
         att_val_n = self._graph_add_attrib_val(att_n, att_value)
         self.graph.add_edge(ent, att_val_n, att_n) # ent -> att_val
-        
+    # ----------------------------------------------------------------------------------------------
     def get_attrib_val(self, ent, name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
 
@@ -566,7 +546,7 @@ class SIM(object):
         if att_vals_n == None:
             return None
         return self.graph.get_node(att_vals_n).get('value')
-
+    # ----------------------------------------------------------------------------------------------
     def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
@@ -577,7 +557,7 @@ class SIM(object):
         :return: No value.
         """
         self.model_attribs[att_name] = att_value
-
+    # ----------------------------------------------------------------------------------------------
     def get_model_attrib_val(self, att_name):
         """Get an attribute value from the model, specifying a name. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
@@ -587,7 +567,7 @@ class SIM(object):
         :return: The attribute value or None if no value.
         """
         return self.model_attribs[att_name]
-
+    # ----------------------------------------------------------------------------------------------
     def get_model_attribs(self):
         """Get a list of attribute names from the model. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
@@ -596,11 +576,9 @@ class SIM(object):
         :return: A list of attribute names.
         """
         return self.model_attribs.keys()
-
     # ==============================================================================================
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
-
     def _get_ent_seq(self, target_ent_type, source_ent_type):
         if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
             return self._ENT_SEQ_COLL_POINT_POSI
@@ -609,7 +587,7 @@ class SIM(object):
         elif (target_ent_type == ENT_TYPE.PGONS or source_ent_type == ENT_TYPE.PGONS):
             return self._ENT_SEQ_COLL_PGON_POSI
         return self._ENT_SEQ
-
+    # ----------------------------------------------------------------------------------------------
     # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
         source_ent_type = self.graph.get_node(source_ent).get('ent_type')
@@ -639,15 +617,18 @@ class SIM(object):
                             ent_set[target_ent] = None # orderd set
             ents = ent_set.keys()
         return target_ents_set.keys()
-
+    # ----------------------------------------------------------------------------------------------
     def num_ents(self, ent_type):
         """Get the number of entities in the model of a specific type.  
 
         :param ent_type: The type of entity to search for in the model.
         :return: A number of entities of the specified type in the model.
         """
-        return self.graph.degree_out(ent_type, self._GRAPH_EDGE_TYPE.META)
-
+        return self.graph.degree_out(
+            self._GRAPH_ENTS_NODE[ent_type.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+    # ----------------------------------------------------------------------------------------------
     def get_ents(self, target_ent_type, source_ents = None):
         """Get entities of a specific type. A list of entity IDs is returned.
 
@@ -665,7 +646,10 @@ class SIM(object):
         :return: A list of unique entity IDs.
         """
         if source_ents == None:
-            return self.graph.successors(target_ent_type, self._GRAPH_EDGE_TYPE.META)
+            return self.graph.successors(
+                self._GRAPH_ENTS_NODE[target_ent_type.name], 
+                self._GRAPH_EDGE_TYPE.META
+            )
         # not a list
         if not type(source_ents) is list:
             return self._nav(target_ent_type, source_ents)
@@ -678,7 +662,7 @@ class SIM(object):
             for target_ent in self._nav(target_ent_type, source_ent):
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
-
+    # ----------------------------------------------------------------------------------------------
     def get_point_posi(self, point):
         """Get the position ID for a point.
 
@@ -687,7 +671,7 @@ class SIM(object):
         """
         vert = self.graph.successors(point, self._GRAPH_EDGE_TYPE.ENT)[0]
         return self.graph.successors(vert, self._GRAPH_EDGE_TYPE.ENT)[0]
-
+    # ----------------------------------------------------------------------------------------------
     def get_pline_posis(self, pline):
         """Get a list of position IDs for a polyline. If the polyline is closed, the first and last
         positions will be the same.
@@ -703,7 +687,7 @@ class SIM(object):
         last_posi = self.graph.successors(last_vert, self._GRAPH_EDGE_TYPE.ENT)[0]
         posis.append(last_posi)
         return posis
-
+    # ----------------------------------------------------------------------------------------------
     def get_pgon_posis(self, pgon):
         """Get a list of lists of position IDs for an polygon. Each list represents one of the
         polygon wires. All wires are assumed to be closed. (The last position is not duplicated.)
@@ -718,11 +702,9 @@ class SIM(object):
             wire_posis = [self.graph.successors(vert, self._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
             posis.append(wire_posis)
         return posis
-
     # ==============================================================================================
     # QUERY
     # ==============================================================================================
-
     def pline_is_closed(self, pline):
         """Check if a polyline is open or closed.
 
@@ -733,7 +715,7 @@ class SIM(object):
         start = self.graph.successors(self.graph.successors(edges[0], self._GRAPH_EDGE_TYPE.ENT)[0], self._GRAPH_EDGE_TYPE.ENT)
         end = self.graph.successors(self.graph.successors(edges[-1], self._GRAPH_EDGE_TYPE.ENT)[1], self._GRAPH_EDGE_TYPE.ENT)
         return start == end
-
+    # ----------------------------------------------------------------------------------------------
     def query(self, ent_type, att_name, comparator, att_val):
         """Find entities in the model that satisy the query condition.
 
@@ -751,27 +733,27 @@ class SIM(object):
         # val == None
         if comparator == '==' and att_val == None:
             set_with_val = set(self.graph.get_nodes_with_edge_out(att_n))
-            set_all = set(self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META))
+            set_all = set(self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META))
             return list(set_all - set_with_val)
         # val != None
         if comparator == '!=' and att_val == None:
             return self.graph.get_nodes_with_edge_out(att_n)
         # val == att_val
         if comparator == '==':
-            att_val_n = self._graph_attrib_val_node_name(att_val)
+            att_val_n = self._graph_attrib_val_node_name(att_val, att_n)
             if not self.graph.has_node(att_val_n):
                 return []
             return self.graph.predecessors(att_val_n, att_n)
         # val != att_val
         if comparator == '!=':
-            att_val_n = self._graph_attrib_val_node_name(att_val)
+            att_val_n = self._graph_attrib_val_node_name(att_val, att_n)
             if not self.graph.has_node(att_val_n):
-                return self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META)
+                return self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META)
             ents_equal = self.graph.predecessors(att_val_n, att_n)
             if len(ents_equal) == 0:
-                return self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META)
+                return self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META)
             set_equal = set(ents_equal)
-            set_all = set(self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META))
+            set_all = set(self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META))
             return list(set_all - set_equal)
         # other cases, data_type must be a number
         data_type = self.graph.get_node(att_n).get('data_type')
@@ -782,28 +764,28 @@ class SIM(object):
         # val < att_val
         if comparator == '<':
             result = []
-            for ent in self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META):
+            for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
                 if val_n != None and self.graph.get_node(val_n).get('value') < att_val:
                     result.append(ent)
         # val <= att_val
         if comparator == '<=':
             result = []
-            for ent in self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META):
+            for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
                 if val_n != None and self.graph.get_node(val_n).get('value') <= att_val:
                     result.append(ent)
         # val > att_val
         if comparator == '>':
             result = []
-            for ent in self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META):
+            for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
                 if val_n != None and self.graph.get_node(val_n).get('value') > att_val:
                     result.append(ent)
         # val >= att_val
         if comparator == '>=':
             result = []
-            for ent in self.graph.successors(ent_type, self._GRAPH_EDGE_TYPE.META):
+            for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type.name], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
                 if val_n != None and self.graph.get_node(val_n).get('value') >= att_val:
                     result.append(ent)
@@ -813,7 +795,6 @@ class SIM(object):
     # ==============================================================================================
     # EXPORT
     # ==============================================================================================
-
     def info(self):
         """Print information about the model. This is mainly used for debugging.
         
@@ -830,21 +811,45 @@ class SIM(object):
             edges = '\n'.join(edges)
             all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
         return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
-
+    # ----------------------------------------------------------------------------------------------
     def export_sim_data(self):
         """Return JSON representing that data in the SIM model.
         
         :return: JSON data.
         """
         # get entities from graph
-        posi_ents = self.graph.successors(ENT_TYPE.POSIS, self._GRAPH_EDGE_TYPE.META)
-        vert_ents = self.graph.successors(ENT_TYPE.VERTS, self._GRAPH_EDGE_TYPE.META)
-        edge_ents = self.graph.successors(ENT_TYPE.EDGES, self._GRAPH_EDGE_TYPE.META)
-        wire_ents = self.graph.successors(ENT_TYPE.WIRES, self._GRAPH_EDGE_TYPE.META)
-        point_ents = self.graph.successors(ENT_TYPE.POINTS, self._GRAPH_EDGE_TYPE.META)
-        pline_ents = self.graph.successors(ENT_TYPE.PLINES, self._GRAPH_EDGE_TYPE.META)
-        pgon_ents = self.graph.successors(ENT_TYPE.PGONS, self._GRAPH_EDGE_TYPE.META)
-        coll_ents = self.graph.successors(ENT_TYPE.COLLS, self._GRAPH_EDGE_TYPE.META)
+        posi_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.POSIS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+        vert_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.VERTS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+        edge_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.EDGES.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+        wire_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.WIRES.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+        point_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.POINTS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
+        pline_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.PLINES.name],  
+            self._GRAPH_EDGE_TYPE.META
+        )
+        pgon_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.PGONS.name],  
+            self._GRAPH_EDGE_TYPE.META
+        )
+        coll_ents = self.graph.successors(
+            self._GRAPH_ENTS_NODE[ENT_TYPE.COLLS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         # create maps for entity name -> entity index
         posis_dict = dict( zip(posi_ents, range(len(posi_ents))) )
         verts_dict = dict( zip(vert_ents, range(len(vert_ents))) )
@@ -856,7 +861,10 @@ class SIM(object):
         colls_dict = dict( zip(coll_ents, range(len(coll_ents))) )
         # create the geometry data
         geometry = {
-            'num_posis': self.graph.degree_out(ENT_TYPE.POSIS, self._GRAPH_EDGE_TYPE.META),
+            'num_posis': self.graph.degree_out(
+                self._GRAPH_ENTS_NODE[ENT_TYPE.POSIS.name], 
+                self._GRAPH_EDGE_TYPE.META
+            ),
             'points': [],
             'plines': [],
             'pgons': [],
@@ -891,21 +899,37 @@ class SIM(object):
                     geometry['coll_colls'][-1].append(colls_dict[ent])
         # get attribs from graph
         posi_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.POSIS), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.POSIS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         vert_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.VERTS), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.VERTS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         edge_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.EDGES), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.EDGES.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         wire_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.WIRES), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.WIRES.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         point_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.POINTS), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.POINTS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         pline_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.PLINES), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.PLINES.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         pgon_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.PGONS), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.PGONS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         coll_attribs = self.graph.successors(
-            self._graph_ent_attribs_node_name(ENT_TYPE.COLLS), self._GRAPH_EDGE_TYPE.META)
+            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.COLLS.name], 
+            self._GRAPH_EDGE_TYPE.META
+        )
         # create the attribute data
         def _attribData(attribs, ent_dict):
             attribs_data = []
@@ -942,14 +966,14 @@ class SIM(object):
             'attributes': attributes
         }
         return data
-
+    # ----------------------------------------------------------------------------------------------
     def export_sim(self):
         """Return a JSON formatted string representing that data in the model.
         
         :return: A JSON string in the SIM format.
         """
         return json.dumps(self.export_sim_data())
-
+    # ----------------------------------------------------------------------------------------------
     def export_sim_file(self, filepath):
         """Import SIM file.
         
@@ -970,14 +994,14 @@ class SIM(object):
         for i in range(json_data['geometry']['num_posis']):
             posis.append(self.add_posi([0,0,0]))
         # points
-        for posi_i in json_data['geometry'][ENT_TYPE.POINTS]:
+        for posi_i in json_data['geometry']['points']:
             self.add_point(posis[posi_i])
         # polylines
-        for posis_i in json_data['geometry'][ENT_TYPE.PLINES]:
+        for posis_i in json_data['geometry']['plines']:
             closed = posis_i[0] == posis_i[-1]
             self.add_pline(map(lambda posi_i: posis[posi_i], posis_i), closed)
         # polygons
-        for posis_i in json_data['geometry'][ENT_TYPE.PGONS]:
+        for posis_i in json_data['geometry']['pgons']:
             self.add_pgon(map(lambda posi_i: posis[posi_i], posis_i[0]))
             # TODO add holes
         # collections
@@ -1004,7 +1028,7 @@ class SIM(object):
             [ENT_TYPE.COLLS, 'co']
         ]
         for ent_type, ent_prefix in ent_types:
-            for attrib in json_data['attributes'][ent_type]:
+            for attrib in json_data['attributes'][ent_type.value]:
                 att_name = attrib['name']
                 if att_name != 'xyz':
                     data_type = DATA_TYPE.get(attrib['data_type'])
@@ -1017,14 +1041,14 @@ class SIM(object):
         # model attributes
         for [attrib_name, attrib_val] in json_data['attributes']['model']:
             self.set_model_attrib_val(attrib_name, attrib_val)
-
+    # ----------------------------------------------------------------------------------------------
     def import_sim(self, json_str):
         """Import SIM string.
         
         :return: No value.
         """
         self.import_sim_data(json.loads(json_str))
-
+    # ----------------------------------------------------------------------------------------------
     def import_sim_file(self, filepath):
         """Import SIM file.
         
@@ -1032,3 +1056,6 @@ class SIM(object):
         """
         with open(filepath, 'r') as f:
             self.import_sim_data(json.loads(f.read()))
+    # ==============================================================================================
+    # THE END SIM CLASS
+    # ==============================================================================================
