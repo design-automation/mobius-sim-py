@@ -78,7 +78,6 @@ class SIM(object):
         ENT_TYPE.PLINES: '_ents_plines',
         ENT_TYPE.PGONS: '_ents_pgons',
         ENT_TYPE.COLLS: '_ents_colls',
-        ENT_TYPE.MODEL: '_ents_model'
     }
     # ----------------------------------------------------------------------------------------------
     # node in the graph that links to all attribs
@@ -91,7 +90,6 @@ class SIM(object):
         ENT_TYPE.PLINES: '_atts_plines',
         ENT_TYPE.PGONS: '_atts_pgons',
         ENT_TYPE.COLLS: '_atts_colls',
-        ENT_TYPE.MODEL: '_atts_model'
     }
     # ----------------------------------------------------------------------------------------------
     # ENT PREFIX
@@ -212,7 +210,7 @@ class SIM(object):
       - e.g. '_att_pgons_area'
 
     - _att_val nodes 
-      - e.g. 'val_[1,2,3]'
+      - e.g. '[1,2,3]'
 
     The forward edges are as follows:
     
@@ -263,7 +261,7 @@ class SIM(object):
         """Create the name for an attrib value node.
         It will be something like this: '_val_[1,2,3]'.
         """
-        data_type = self.graph.get_node(att_n).get('data_type')
+        data_type = self.graph.get_node_props(att_n).get('data_type')
         if data_type == DATA_TYPE.NUM or data_type == DATA_TYPE.STR:
             return att_val
         return str(att_val)
@@ -447,7 +445,7 @@ class SIM(object):
         :param ent: The ID of the entity to be added to the collection.
         :return: No value.
         """
-        ent_type = self.graph.get_node(ent).get('ent_type')
+        ent_type = self.graph.get_node_props(ent).get('ent_type')
         if ent_type not in self._COLL_ENT_TYPES:
             raise Exception('Invalid entitiy for collections.')
         self.graph.add_edge(coll, ent, edge_type = self._GRAPH_EDGE_TYPE.ENT)
@@ -466,7 +464,7 @@ class SIM(object):
         att_n = self._graph_attrib_node_name(ent_type, att_name)
         if not self.graph.has_node(att_n):
             self._graph_add_attrib(ent_type, att_name, att_data_type)
-        elif self.graph.get_node(att_n).get('data_type') != att_data_type:
+        elif self.graph.get_node_props(att_n).get('data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
     # ----------------------------------------------------------------------------------------------
     def has_attrib(self, ent_type, att_name):
@@ -486,7 +484,7 @@ class SIM(object):
         :return: A list of attrib names.
         """
         return map(
-            lambda att_n: self.graph.get_node(att_n).get('name'), 
+            lambda att_n: self.graph.get_node_props(att_n).get('name'), 
             self.graph.successors(
                 self._GRAPH_ATTRIBS_NODE[ent_type],
                 self._GRAPH_EDGE_TYPE.META
@@ -506,12 +504,12 @@ class SIM(object):
         :param att_value: The attribute value to set.
         :return: No value.
         """
-        ent_type = self.graph.get_node(ent).get('ent_type')
+        ent_type = self.graph.get_node_props(ent).get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, att_name)
-        if ent_type != self.graph.get_node(att_n).get('ent_type'):
+        if ent_type != self.graph.get_node_props(att_n).get('ent_type'):
             raise Exception('Entity and attribute have different types.')
         data_type = self._check_type(att_value)
-        if self.graph.get_node(att_n).get('data_type') != data_type:
+        if self.graph.get_node_props(att_n).get('data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value))
         att_val_n = self._graph_add_attrib_val(att_n, att_value)
         self.graph.add_edge(ent, att_val_n, att_n) # ent -> att_val
@@ -523,12 +521,12 @@ class SIM(object):
         :param name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        ent_type = self.graph.get_node(ent).get('ent_type')
+        ent_type = self.graph.get_node_props(ent).get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, name)
         att_vals_n = self.graph.successors(ent, att_n)
         if att_vals_n == None:
             return None
-        return self.graph.get_node(att_vals_n).get('value')
+        return self.graph.get_node_props(att_vals_n).get('value')
     # ----------------------------------------------------------------------------------------------
     def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
@@ -573,7 +571,7 @@ class SIM(object):
     # ----------------------------------------------------------------------------------------------
     # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
-        source_ent_type = self.graph.get_node(source_ent).get('ent_type')
+        source_ent_type = self.graph.get_node_props(source_ent).get('ent_type')
         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
         if source_ent_type == target_ent_type:
             # TODO nav colls of colls
@@ -590,7 +588,7 @@ class SIM(object):
             ent_set = OrderedDict()
             for ent in ents:
                 for target_ent in navigate(ent, self._GRAPH_EDGE_TYPE.ENT):
-                    this_ent_type = self.graph.get_node(target_ent).get('ent_type')
+                    this_ent_type = self.graph.get_node_props(target_ent).get('ent_type')
                     if this_ent_type in ent_seq:
                         if this_ent_type == target_ent_type:
                             target_ents_set[target_ent] = None # orderd set
@@ -715,12 +713,12 @@ class SIM(object):
             raise Exception("The attribute does not exist: '" + att_name + "'.")
         # val == None
         if comparator == '==' and att_val == None:
-            set_with_val = set(self.graph.get_nodes_with_edge_out(att_n))
+            set_with_val = set(self.graph.get_nodes_with_out_edge(att_n))
             set_all = set(self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META))
             return list(set_all - set_with_val)
         # val != None
         if comparator == '!=' and att_val == None:
-            return self.graph.get_nodes_with_edge_out(att_n)
+            return self.graph.get_nodes_with_out_edge(att_n)
         # val == att_val
         if comparator == '==':
             att_val_n = self._graph_attrib_val_node_name(att_val, att_n)
@@ -739,7 +737,7 @@ class SIM(object):
             set_all = set(self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META))
             return list(set_all - set_equal)
         # other cases, data_type must be a number
-        data_type = self.graph.get_node(att_n).get('data_type')
+        data_type = self.graph.get_node_props(att_n).get('data_type')
         if data_type != DATA_TYPE.NUM:
             raise Exception("The '" + comparator +
                 "' comparator cannot be used with attributes of type '" + data_type + "'.")
@@ -749,28 +747,28 @@ class SIM(object):
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
-                if val_n != None and self.graph.get_node(val_n).get('value') < att_val:
+                if val_n != None and self.graph.get_node_props(val_n).get('value') < att_val:
                     result.append(ent)
         # val <= att_val
         if comparator == '<=':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
-                if val_n != None and self.graph.get_node(val_n).get('value') <= att_val:
+                if val_n != None and self.graph.get_node_props(val_n).get('value') <= att_val:
                     result.append(ent)
         # val > att_val
         if comparator == '>':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
-                if val_n != None and self.graph.get_node(val_n).get('value') > att_val:
+                if val_n != None and self.graph.get_node_props(val_n).get('value') > att_val:
                     result.append(ent)
         # val >= att_val
         if comparator == '>=':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
                 val_n = self.graph.successors(ent, att_n)
-                if val_n != None and self.graph.get_node(val_n).get('value') >= att_val:
+                if val_n != None and self.graph.get_node_props(val_n).get('value') >= att_val:
                     result.append(ent)
         # return list of entities
         # TODO handle queries sub-entities in lists and dicts
@@ -783,7 +781,7 @@ class SIM(object):
         
         :return: A string describing the data in the model.
         """
-        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.get_node(n)), self.graph._nodes)
+        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.get_node_props(n)), self.graph._nodes)
         nodes = '\n'.join(nodes)
         all_edges = ''
         for edge_type in self.graph._edge_types:
@@ -871,7 +869,7 @@ class SIM(object):
             geometry['coll_pgons'].append([])
             geometry['coll_colls'].append([])
             for ent in self.graph.successors(coll_ent, self._GRAPH_EDGE_TYPE.ENT):
-                ent_type = self.graph.get_node(ent).get('ent_type')
+                ent_type = self.graph.get_node_props(ent).get('ent_type')
                 if ent_type == ENT_TYPE.POINTS:
                     geometry['coll_points'][-1].append(points_dict[ent])
                 elif ent_type == ENT_TYPE.PLINES:
@@ -919,12 +917,12 @@ class SIM(object):
             for att_n in attribs:
                 data = OrderedDict()
                 att_vals_n = self.graph.predecessors(att_n, self._GRAPH_EDGE_TYPE.ATTRIB)
-                data['name'] = self.graph.get_node(att_n).get('name')
-                data['data_type'] = self.graph.get_node(att_n).get('data_type')
+                data['name'] = self.graph.get_node_props(att_n).get('name')
+                data['data_type'] = self.graph.get_node_props(att_n).get('data_type')
                 data['values'] = []
                 data['entities'] = []
                 for att_val_n in att_vals_n:
-                    data['values'].append(self.graph.get_node(att_val_n).get('value'))
+                    data['values'].append(self.graph.get_node_props(att_val_n).get('value'))
                     # idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
                     idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, att_n)]
                     data['entities'].append(idxs)
