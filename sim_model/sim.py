@@ -153,7 +153,7 @@ class SIM(object):
     def __init__(self):
         """Constructor for creating a new empty model
         """
-       # graph
+        # graph
         self.graph = Graph()
         self.graph.add_edge_type(self._GRAPH_EDGE_TYPE.ENT, Graph.M2M) # many to many
         self.graph.add_edge_type(self._GRAPH_EDGE_TYPE.ATTRIB, Graph.M2O) # many to one
@@ -161,8 +161,6 @@ class SIM(object):
         # create nodes for ents and attribs
         for ent_type in [ENT_TYPE.POSIS, ENT_TYPE.VERTS, ENT_TYPE.EDGES, ENT_TYPE.WIRES, 
             ENT_TYPE.POINTS, ENT_TYPE.PLINES, ENT_TYPE.PGONS, ENT_TYPE.COLLS]:
-            if ent_type == ENT_TYPE.MODEL:
-                continue
             self.graph.add_node(
                 self._GRAPH_ENTS_NODE[ent_type]
             )
@@ -275,20 +273,20 @@ class SIM(object):
         ent_type_n = self._GRAPH_ENTS_NODE[ent_type]
         # create the node name, from prefix and then next count number
         ent_i = self.graph.degree_out(ent_type_n, edge_type = self._GRAPH_EDGE_TYPE.META)
-        n = self._ENT_PREFIX[ent_type] + str(ent_i)
+        ent = self._ENT_PREFIX[ent_type] + str(ent_i)
         # add a node with name `n`
         # the new node has 1 property
-        self.graph.add_node(n, 
+        self.graph.add_node(ent, 
             ent_type = ent_type  # the type of entity, `posi`, `vert`, etc
         )
         # create an edge from the node `ent_type` to the new node
         # the new edge is given the attribute `meta`
         # this edge is so that later the node can be found
-        self.graph.add_edge(ent_type_n, n, 
+        self.graph.add_edge(ent_type_n, ent, 
             edge_type = self._GRAPH_EDGE_TYPE.META
         )
         # return the name of the new entity node
-        return n
+        return ent
     # ----------------------------------------------------------------------------------------------
     def _graph_add_attrib(self, ent_type, name, data_type):
         """Add an attribute node to the graph.
@@ -523,7 +521,7 @@ class SIM(object):
         """
         ent_type = self.graph.get_node_props(ent).get('ent_type')
         att_n = self._graph_attrib_node_name(ent_type, name)
-        att_vals_n = self.graph.successors(ent, att_n)
+        att_vals_n = self.graph.successor(ent, att_n)
         if att_vals_n == None:
             return None
         return self.graph.get_node_props(att_vals_n).get('value')
@@ -746,28 +744,28 @@ class SIM(object):
         if comparator == '<':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
-                val_n = self.graph.successors(ent, att_n)
+                val_n = self.graph.successor(ent, att_n)
                 if val_n != None and self.graph.get_node_props(val_n).get('value') < att_val:
                     result.append(ent)
         # val <= att_val
         if comparator == '<=':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
-                val_n = self.graph.successors(ent, att_n)
+                val_n = self.graph.successor(ent, att_n)
                 if val_n != None and self.graph.get_node_props(val_n).get('value') <= att_val:
                     result.append(ent)
         # val > att_val
         if comparator == '>':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
-                val_n = self.graph.successors(ent, att_n)
+                val_n = self.graph.successor(ent, att_n)
                 if val_n != None and self.graph.get_node_props(val_n).get('value') > att_val:
                     result.append(ent)
         # val >= att_val
         if comparator == '>=':
             result = []
             for ent in self.graph.successors(self._GRAPH_ENTS_NODE[ent_type], self._GRAPH_EDGE_TYPE.META):
-                val_n = self.graph.successors(ent, att_n)
+                val_n = self.graph.successor(ent, att_n)
                 if val_n != None and self.graph.get_node_props(val_n).get('value') >= att_val:
                     result.append(ent)
         # return list of entities
