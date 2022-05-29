@@ -33,6 +33,12 @@ class TestAttribs(unittest.TestCase):
         self.assertEqual(list(atts2), ['xyz'])
         self.assertEqual(list(atts3), [])
 
+    def test_get_attrib_vals(self):
+        att_vals1 = self.model.get_attrib_vals(ENT_TYPE.POINTS, 'test')
+        att_vals2 = self.model.get_attrib_vals(ENT_TYPE.POSIS, 'xyz')
+        self.assertEqual(list(att_vals1), ['hello1', 'hello2'])
+        self.assertEqual(list(att_vals2), [[1,2,3], [4,5,6]])
+
     def test_get_point_attribs(self):
         points = self.model.get_ents(ENT_TYPE.POINTS)
         str1 = self.model.get_attrib_val(points[0], 'test')
@@ -50,6 +56,13 @@ class TestAttribs(unittest.TestCase):
         self.assertEqual( self.model.get_model_attrib_val("a_number"), 123)
         self.assertEqual( self.model.get_model_attrib_val("a_list"), [1, "two", [3]])
         self.assertEqual( self.model.get_model_attrib_val("a_dict"), { "a": 1, "b": "two", "c": [3]})
-        
+
+    def test_has_model_attrib(self):
+        self.assertTrue( self.model.has_model_attrib("a_sting") )
+        self.assertTrue( self.model.has_model_attrib("a_number") )
+        self.assertTrue( self.model.has_model_attrib("a_list") )
+        self.assertTrue( self.model.has_model_attrib("a_dict") )
+        self.assertFalse( self.model.has_model_attrib("abc") )
+       
 if __name__ == '__main__':
     unittest.main()

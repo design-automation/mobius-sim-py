@@ -47,5 +47,15 @@ class TestPoints(unittest.TestCase):
         point = self.model.get_ents(ENT_TYPE.POINTS, verts[0])
         self.assertEqual(list(point), ['pt0'])
 
+    def test_get_point_xyz(self):
+        points = self.model.get_ents(ENT_TYPE.POINTS)
+        verts = self.model.get_ents(ENT_TYPE.VERTS, points[0])
+        vert_xyz = self.model.get_vert_coords(verts[0])
+        self.assertEqual(list(vert_xyz), [1,2,3])
+        point = self.model.get_ents(ENT_TYPE.POINTS, verts[0])
+        posis = self.model.get_ents(ENT_TYPE.POSIS, points[0])
+        posi_xyz = self.model.get_posi_coords(posis[0])
+        self.assertEqual(list(posi_xyz), [1,2,3])
+
 if __name__ == '__main__':
     unittest.main()

@@ -175,7 +175,11 @@ def import_sim_data(sim_model, json_data):
     for ent_type, ent_prefix in ent_types_prefix:
         for attrib in json_data['attributes'][ent_type]:
             att_name = attrib['name']
-            if att_name != 'xyz':
+            if sim_model.has_attrib(ent_type, att_name): 
+                if (attrib['data_type'] != sim_model.get_attrib_datatype(ent_type, att_name)):
+                    # if attrib already exists but with different datatype, then rename attrib
+                    att_name = att_name + '_' + attrib['data_type']
+            else:
                 sim_model.add_attrib(ent_type, att_name, attrib['data_type'])
             for i in range(len(attrib['values'])):
                 att_value = attrib['values'][i]
