@@ -6,6 +6,7 @@ import unittest
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 from sim_model import sim
+from sim_model import io_sim
 ENT_TYPE = sim.ENT_TYPE
 DATA_TYPE = sim.DATA_TYPE
 
@@ -40,7 +41,7 @@ class TestAttribs(unittest.TestCase):
         self.assertEqual(str2, 'hello2')
 
     def test_get_point_data(self):
-        json = self.model.export_sim_data()
+        json = io_sim.export_sim_data(self.model)
         data = [{"name": "test", "data_type": "string", "values": ["hello1", "hello2"], "entities": [[0], [1]]}]
         self.assertEqual(json['attributes']['points'], data)
 

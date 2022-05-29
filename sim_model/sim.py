@@ -111,42 +111,6 @@ class SIM(object):
         ENT_TYPE.PGONS, 
         ENT_TYPE.COLLS
     ]
-    # ----------------------------------------------------------------------------------------------
-    _ENT_SEQ = {
-        ENT_TYPE.POSIS: 0,
-        ENT_TYPE.VERTS: 1,
-        ENT_TYPE.EDGES: 2,
-        ENT_TYPE.WIRES: 3,
-        ENT_TYPE.POINTS: 4,
-        ENT_TYPE.PLINES: 4,
-        ENT_TYPE.PGONS: 4,
-        ENT_TYPE.COLLS: 5
-    }
-    # ----------------------------------------------------------------------------------------------
-    _ENT_SEQ_COLL_POINT_POSI = {
-        ENT_TYPE.POSIS: 0,
-        ENT_TYPE.VERTS: 1,
-        ENT_TYPE.POINTS: 2,
-        ENT_TYPE.COLLS: 3
-    }
-    # ----------------------------------------------------------------------------------------------
-    _ENT_SEQ_COLL_PLINE_POSI = {
-        ENT_TYPE.POSIS: 0,
-        ENT_TYPE.VERTS: 1,
-        ENT_TYPE.EDGES: 2,
-        ENT_TYPE.WIRES: 3,
-        ENT_TYPE.PLINES: 4,
-        ENT_TYPE.COLLS: 5
-    }
-    # ----------------------------------------------------------------------------------------------
-    _ENT_SEQ_COLL_PGON_POSI = {
-        ENT_TYPE.POSIS: 0,
-        ENT_TYPE.VERTS: 1,
-        ENT_TYPE.EDGES: 2,
-        ENT_TYPE.WIRES: 3,
-        ENT_TYPE.PGONS: 4,
-        ENT_TYPE.COLLS: 5
-    }
     # ==============================================================================================
     # CONSTRUCTOR FOR SIM CLASS
     # ==============================================================================================
@@ -526,6 +490,38 @@ class SIM(object):
             return None
         return self.graph.get_node_props(att_vals_n).get('value')
     # ----------------------------------------------------------------------------------------------
+    def get_attrib_vals(self, ent_type, name):
+        """Get a list of all the attribute values for the specified attribute.
+
+        :param ent_type: The entity type for getting attributes. (See ENT_TYPE)
+        :param name: The name of the attribute.
+        :return: A list of all attribute values.
+        """
+        att_n = self._graph_attrib_node_name(ent_type, name)
+        att_vals_n = self.graph.predecessors(att_n, self._GRAPH_EDGE_TYPE.ATTRIB)
+        values = []
+        for att_val_n in att_vals_n:
+            values.append(self.graph.get_node_props(att_val_n).get('value'))
+        return values
+    # ----------------------------------------------------------------------------------------------
+    def get_attrib_datatype(self, ent_type, name):
+        """Get an attribute datatype, specifying the attribute entity type and attribute name.
+
+        :param ent_type: The entity type for getting attributes. (See ENT_TYPE)
+        :param name: The name of the attribute.
+        :return: The attribute value or None if no value.
+        """
+        att_n = self._graph_attrib_node_name(ent_type, name)
+        return self.graph.get_node_props(att_n).get('data_type')
+    # ----------------------------------------------------------------------------------------------
+    def has_model_attrib(self, att_name):
+        """Returns true if a model attribute exists with the specified name.
+
+        :param att_name: The name of the attribute. 
+        :return: True is the attribute exists, false otherwise.
+        """
+        return att_name in self.model_attribs
+    # ----------------------------------------------------------------------------------------------
     def set_model_attrib_val(self, att_name, att_value):
         """Set an attribute value from the model, specifying a name and value. Model attributes are
         top level attributes that apply to the whole model. As such, they are not attached to any
@@ -558,6 +554,42 @@ class SIM(object):
     # ==============================================================================================
     # GET METHODS FOR ENTITIES
     # ==============================================================================================
+    _ENT_SEQ = {
+        ENT_TYPE.POSIS: 0,
+        ENT_TYPE.VERTS: 1,
+        ENT_TYPE.EDGES: 2,
+        ENT_TYPE.WIRES: 3,
+        ENT_TYPE.POINTS: 4,
+        ENT_TYPE.PLINES: 4,
+        ENT_TYPE.PGONS: 4,
+        ENT_TYPE.COLLS: 6
+    }
+    # ----------------------------------------------------------------------------------------------
+    _ENT_SEQ_COLL_POINT_POSI = {
+        ENT_TYPE.POSIS: 0,
+        ENT_TYPE.VERTS: 1,
+        ENT_TYPE.POINTS: 2,
+        ENT_TYPE.COLLS: 6
+    }
+    # ----------------------------------------------------------------------------------------------
+    _ENT_SEQ_COLL_PLINE_POSI = {
+        ENT_TYPE.POSIS: 0,
+        ENT_TYPE.VERTS: 1,
+        ENT_TYPE.EDGES: 2,
+        ENT_TYPE.WIRES: 3,
+        ENT_TYPE.PLINES: 4,
+        ENT_TYPE.COLLS: 6
+    }
+    # ----------------------------------------------------------------------------------------------
+    _ENT_SEQ_COLL_PGON_POSI = {
+        ENT_TYPE.POSIS: 0,
+        ENT_TYPE.VERTS: 1,
+        ENT_TYPE.EDGES: 2,
+        ENT_TYPE.WIRES: 3,
+        ENT_TYPE.PGONS: 4,
+        ENT_TYPE.COLLS: 6
+    }
+    # ----------------------------------------------------------------------------------------------
     def _get_ent_seq(self, target_ent_type, source_ent_type):
         if (target_ent_type == ENT_TYPE.POINTS or source_ent_type == ENT_TYPE.POINTS):
             return self._ENT_SEQ_COLL_POINT_POSI
@@ -572,30 +604,32 @@ class SIM(object):
         source_ent_type = self.graph.get_node_props(source_ent).get('ent_type')
         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
         if source_ent_type == target_ent_type:
-            # TODO nav colls of colls
+            if source_ent_type == ENT_TYPE.COLLS:
+                return [] # TODO nav colls of colls
             return [source_ent]
         dist = ent_seq[source_ent_type] - ent_seq[target_ent_type]
         if dist == 1:
             return self.graph.successors(source_ent, self._GRAPH_EDGE_TYPE.ENT)
         if dist == -1:
             return self.graph.predecessors(source_ent, self._GRAPH_EDGE_TYPE.ENT)
+        # get the function to navigate
         navigate = self.graph.successors if dist > 0 else self.graph.predecessors
         ents = [source_ent]
-        target_ents_set = OrderedDict()
+        target_ents_set = OrderedDict() # to be used as an ordered set
         while ents:
-            ent_set = OrderedDict()
+            ent_set = OrderedDict() # to be used as an ordered set
             for ent in ents:
                 for target_ent in navigate(ent, self._GRAPH_EDGE_TYPE.ENT):
                     this_ent_type = self.graph.get_node_props(target_ent).get('ent_type')
-                    if this_ent_type in ent_seq:
-                        if this_ent_type == target_ent_type:
-                            target_ents_set[target_ent] = None # orderd set
-                        elif dist > 0 and ent_seq[this_ent_type] > ent_seq[target_ent_type]:
-                            ent_set[target_ent] = None # orderd set
+                    if this_ent_type == target_ent_type:
+                        target_ents_set[target_ent] = None # add to orderd set
+                    elif this_ent_type in ent_seq:
+                        if dist > 0 and ent_seq[this_ent_type] > ent_seq[target_ent_type]:
+                            ent_set[target_ent] = None # add to orderd set
                         elif dist < 0 and ent_seq[this_ent_type] < ent_seq[target_ent_type]:
-                            ent_set[target_ent] = None # orderd set
+                            ent_set[target_ent] = None # add to orderd set
             ents = ent_set.keys()
-        return target_ents_set.keys()
+        return list(target_ents_set.keys())
     # ----------------------------------------------------------------------------------------------
     def num_ents(self, ent_type):
         """Get the number of entities in the model of a specific type.  
@@ -681,6 +715,16 @@ class SIM(object):
             wire_posis = [self.graph.successors(vert, self._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
             posis.append(wire_posis)
         return posis
+    # ----------------------------------------------------------------------------------------------
+    def get_posi_coords(self, posi):
+        """Get the XYZ coordinates of a position
+
+        :param posi: A position ID.
+        :return: A list of three numbers, the XYZ coordinates.
+        """
+        att_n = self._graph_attrib_node_name(ENT_TYPE.POSIS, 'xyz')
+        att_vals_n = self.graph.successor(posi, att_n)
+        return self.graph.get_node_props(att_vals_n).get('value')
     # ==============================================================================================
     # QUERY
     # ==============================================================================================
@@ -771,269 +815,6 @@ class SIM(object):
         # return list of entities
         # TODO handle queries sub-entities in lists and dicts
         return result
-    # ==============================================================================================
-    # EXPORT
-    # ==============================================================================================
-    def info(self):
-        """Print information about the model. This is mainly used for debugging.
-        
-        :return: A string describing the data in the model.
-        """
-        nodes = map(lambda n: '- ' + n + ': ' + str(self.graph.get_node_props(n)), self.graph._nodes)
-        nodes = '\n'.join(nodes)
-        all_edges = ''
-        for edge_type in self.graph._edge_types:
-            edges = map(
-                lambda e: '- ' + e + ': ' + str(self.graph._edges_fwd[edge_type][e]), 
-                self.graph._edges_fwd[edge_type]
-            )
-            edges = '\n'.join(edges)
-            all_edges = all_edges + '\n EDGES: ' + edge_type + '\n' + edges + '\n'
-        return 'NODES: \n' + nodes + '\n' + all_edges + '\n\n\n'
-    # ----------------------------------------------------------------------------------------------
-    def export_sim_data(self):
-        """Return JSON representing that data in the SIM model.
-        
-        :return: JSON data.
-        """
-        # get entities from graph
-        posi_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.POSIS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        vert_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.VERTS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        edge_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.EDGES], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        wire_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.WIRES], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        point_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.POINTS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        pline_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.PLINES],  
-            self._GRAPH_EDGE_TYPE.META
-        )
-        pgon_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.PGONS],  
-            self._GRAPH_EDGE_TYPE.META
-        )
-        coll_ents = self.graph.successors(
-            self._GRAPH_ENTS_NODE[ENT_TYPE.COLLS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        # create maps for entity name -> entity index
-        posis_dict = dict( zip(posi_ents, range(len(posi_ents))) )
-        verts_dict = dict( zip(vert_ents, range(len(vert_ents))) )
-        edges_dict = dict( zip(edge_ents, range(len(edge_ents))) )
-        wires_dict = dict( zip(wire_ents, range(len(wire_ents))) )
-        points_dict = dict( zip(point_ents, range(len(point_ents))) )
-        plines_dict = dict( zip(pline_ents, range(len(pline_ents))) )
-        pgons_dict = dict( zip(pgon_ents, range(len(pgon_ents))) )
-        colls_dict = dict( zip(coll_ents, range(len(coll_ents))) )
-        # create the geometry data
-        geometry = {
-            'num_posis': self.graph.degree_out(
-                self._GRAPH_ENTS_NODE[ENT_TYPE.POSIS], 
-                self._GRAPH_EDGE_TYPE.META
-            ),
-            'points': [],
-            'plines': [],
-            'pgons': [],
-            'coll_points': [],
-            'coll_plines': [],
-            'coll_pgons':  [],
-            'coll_colls': []
-        }
-        for point_ent in point_ents:
-            posi_i = self.get_point_posi(point_ent)
-            geometry['points'].append(posis_dict[posi_i])
-        for pline_ent in pline_ents:
-            posis_i = self.get_pline_posis(pline_ent)
-            geometry['plines'].append([posis_dict[posi_i] for posi_i in posis_i])
-        for pgon_ent in pgon_ents:
-            wires_posis_i = self.get_pgon_posis(pgon_ent)
-            geometry['pgons'].append([[posis_dict[posi_i] for posi_i in posis_i] for posis_i in wires_posis_i])
-        for coll_ent in coll_ents:
-            geometry['coll_points'].append([])
-            geometry['coll_plines'].append([])
-            geometry['coll_pgons'].append([])
-            geometry['coll_colls'].append([])
-            for ent in self.graph.successors(coll_ent, self._GRAPH_EDGE_TYPE.ENT):
-                ent_type = self.graph.get_node_props(ent).get('ent_type')
-                if ent_type == ENT_TYPE.POINTS:
-                    geometry['coll_points'][-1].append(points_dict[ent])
-                elif ent_type == ENT_TYPE.PLINES:
-                    geometry['coll_plines'][-1].append(plines_dict[ent])
-                elif ent_type == ENT_TYPE.PGONS:
-                    geometry['coll_pgons'][-1].append(pgons_dict[ent])
-                elif ent_type == ENT_TYPE.COLLS:
-                    geometry['coll_colls'][-1].append(colls_dict[ent])
-        # get attribs from graph
-        posi_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.POSIS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        vert_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.VERTS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        edge_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.EDGES], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        wire_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.WIRES], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        point_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.POINTS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        pline_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.PLINES], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        pgon_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.PGONS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        coll_attribs = self.graph.successors(
-            self._GRAPH_ATTRIBS_NODE[ENT_TYPE.COLLS], 
-            self._GRAPH_EDGE_TYPE.META
-        )
-        # create the attribute data
-        def _attribData(attribs, ent_dict):
-            attribs_data = []
-            for att_n in attribs:
-                data = OrderedDict()
-                att_vals_n = self.graph.predecessors(att_n, self._GRAPH_EDGE_TYPE.ATTRIB)
-                data['name'] = self.graph.get_node_props(att_n).get('name')
-                data['data_type'] = self.graph.get_node_props(att_n).get('data_type')
-                data['values'] = []
-                data['entities'] = []
-                for att_val_n in att_vals_n:
-                    data['values'].append(self.graph.get_node_props(att_val_n).get('value'))
-                    # idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, _EDGE_TYPE.ATTRIB)]
-                    idxs = [ent_dict[ent] for ent in self.graph.predecessors(att_val_n, att_n)]
-                    data['entities'].append(idxs)
-                attribs_data.append(data)
-            return attribs_data
-        attributes = {
-            'posis': _attribData(posi_attribs, posis_dict),
-            'verts': _attribData(vert_attribs, verts_dict),
-            'edges': _attribData(edge_attribs, edges_dict),
-            'wires': _attribData(wire_attribs, wires_dict),
-            'points': _attribData(point_attribs, points_dict),
-            'plines': _attribData(pline_attribs, plines_dict),
-            'pgons': _attribData(pgon_attribs, pgons_dict),
-            'colls': _attribData(coll_attribs, colls_dict),
-            'model': list(self.model_attribs.items())
-        }
-        # create the json
-        data = {
-            'type': 'SIM',
-            'version': '0.1',
-            'geometry': geometry,
-            'attributes': attributes
-        }
-        return data
-    # ----------------------------------------------------------------------------------------------
-    def export_sim(self):
-        """Return a JSON formatted string representing that data in the model.
-        
-        :return: A JSON string in the SIM format.
-        """
-        return json.dumps(self.export_sim_data())
-    # ----------------------------------------------------------------------------------------------
-    def export_sim_file(self, filepath):
-        """Import SIM file.
-        
-        :return: No value.
-        """
-        with open(filepath, 'w') as f:
-            f.write( json.dumps(self.export_sim_data()) )
-    # ==============================================================================================
-    # IMPORT
-    # ==============================================================================================
-    def import_sim_data(self, json_data):
-        """Import SIM JSON data.
-        
-        :return: No value.
-        """
-        # positions
-        posis = []
-        for i in range(json_data['geometry']['num_posis']):
-            posis.append(self.add_posi([0,0,0]))
-        # points
-        for posi_i in json_data['geometry']['points']:
-            self.add_point(posis[posi_i])
-        # polylines
-        for posis_i in json_data['geometry']['plines']:
-            closed = posis_i[0] == posis_i[-1]
-            self.add_pline(map(lambda posi_i: posis[posi_i], posis_i), closed)
-        # polygons
-        for posis_i in json_data['geometry']['pgons']:
-            self.add_pgon(map(lambda posi_i: posis[posi_i], posis_i[0]))
-            # TODO add holes
-        # collections
-        num_colls = len(json_data['geometry']['coll_points'])
-        for i in range(num_colls):
-            coll = self.add_coll()
-            for point_i in json_data['geometry']['coll_points'][i]:
-                self.add_coll_ent(coll, 'pt' + str(point_i))
-            for pline_i in json_data['geometry']['coll_plines'][i]:
-                self.add_coll_ent(coll, 'pl' + str(pline_i))
-            for pgon_i in json_data['geometry']['coll_pgons'][i]:
-                self.add_coll_ent(coll, 'pg' + str(pgon_i))
-            for child_coll_i in json_data['geometry']['coll_colls'][i]:
-                self.add_coll_ent(coll, 'co' + str(child_coll_i))
-        # entity attribs
-        ent_types = [
-            [ENT_TYPE.POSIS, 'ps'],
-            [ENT_TYPE.VERTS, '_v'],
-            [ENT_TYPE.EDGES, '_e'],
-            [ENT_TYPE.WIRES, '_w'],
-            [ENT_TYPE.POINTS, 'pt'],
-            [ENT_TYPE.PLINES, 'pl'],
-            [ENT_TYPE.PGONS, 'pg'],
-            [ENT_TYPE.COLLS, 'co']
-        ]
-        for ent_type, ent_prefix in ent_types:
-            for attrib in json_data['attributes'][ent_type]:
-                att_name = attrib['name']
-                if att_name != 'xyz':
-                    self.add_attrib(ent_type, att_name, attrib['data_type'])
-                for i in range(len(attrib['values'])):
-                    att_value = attrib['values'][i]
-                    for ent_i in attrib['entities'][i]:
-                        ent = ent_prefix + str(ent_i)
-                        self.set_attrib_val(ent, att_name, att_value)
-        # model attributes
-        for [attrib_name, attrib_val] in json_data['attributes']['model']:
-            self.set_model_attrib_val(attrib_name, attrib_val)
-    # ----------------------------------------------------------------------------------------------
-    def import_sim(self, json_str):
-        """Import SIM string.
-        
-        :return: No value.
-        """
-        self.import_sim_data(json.loads(json_str))
-    # ----------------------------------------------------------------------------------------------
-    def import_sim_file(self, filepath):
-        """Import SIM file.
-        
-        :return: No value.
-        """
-        with open(filepath, 'r') as f:
-            self.import_sim_data(json.loads(f.read()))
 # ==================================================================================================
 # END SIM CLASS
 # ==================================================================================================
