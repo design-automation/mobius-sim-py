@@ -52,13 +52,13 @@ def export_sim_data(sim_model):
         'coll_colls': []
     }
     for point_ent in point_ents:
-        posi_i = sim_model.get_point_posi(point_ent)
+        posi_i = sim_model.get_ent_posis(point_ent)
         geometry['points'].append(posis_dict[posi_i])
     for pline_ent in pline_ents:
-        posis_i = sim_model.get_pline_posis(pline_ent)
+        posis_i = sim_model.get_ent_posis(pline_ent)
         geometry['plines'].append([posis_dict[posi_i] for posi_i in posis_i])
     for pgon_ent in pgon_ents:
-        wires_posis_i = sim_model.get_pgon_posis(pgon_ent)
+        wires_posis_i = sim_model.get_ent_posis(pgon_ent)
         geometry['pgons'].append([[posis_dict[posi_i] for posi_i in posis_i] for posis_i in wires_posis_i])
     for coll_ent in coll_ents:
         # points

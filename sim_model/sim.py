@@ -678,70 +678,94 @@ class SIM(object):
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
     # ----------------------------------------------------------------------------------------------
-    def get_point_posi(self, point):
-        """Get the position ID for a point.
+    def get_ent_posis(self, ent):
+        """Get a position ID or list the position IDs for an entity.
 
-        :param point: A point ID from which to get the position.
-        :return: A position ID. 
-        """
-        vert = self.graph.successors(point, SIM._GRAPH_EDGE_TYPE.ENT)[0]
-        return self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
-    # ----------------------------------------------------------------------------------------------
-    def get_pline_posis(self, pline):
-        """Get a list of position IDs for a polyline. If the polyline is closed, the first and last
-        positions will be the same.
+        If the entity is a point, vertex, or position, then a single position is returned.
+        If the entity is a polyline, a list of positions will be returned.
+        For a closed polyline, the first and last positions will be the same.
+        If the entity is a polygon, a nested list of positions is returned.
+        If the entity is a collection, ... not mplemented
 
-        :param pline: A polyline ID from which to get the positions.
-        :return: A list of position IDs. The list may contain duplicates.
+        :param point: An entity ID from which to get the position.
+        :return: A list of position IDs. 
         """
-        wire = self.graph.successors(pline, SIM._GRAPH_EDGE_TYPE.ENT)[0]
-        edges = self.graph.successors(wire, SIM._GRAPH_EDGE_TYPE.ENT)
-        verts = [self.graph.successors(edge, SIM._GRAPH_EDGE_TYPE.ENT)[0] for edge in edges]
-        posis = [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
-        last_vert = self.graph.successors(edges[-1], SIM._GRAPH_EDGE_TYPE.ENT)[1]
-        last_posi = self.graph.successors(last_vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
-        posis.append(last_posi)
-        return posis
-    # ----------------------------------------------------------------------------------------------
-    def get_pgon_posis(self, pgon):
-        """Get a list of lists of position IDs for an polygon. Each list represents one of the
-        polygon wires. All wires are assumed to be closed. (The last position is not duplicated.)
-
-        :param pgon: A polygon ID from which to get the positions.
-        :return: A list of lists of position IDs. The lists may contain duplicates.
-        """
-        posis = []
-        for wire in self.graph.successors(pgon, SIM._GRAPH_EDGE_TYPE.ENT):
+        ent_type = self.graph.get_node_props(ent).get('ent_type')
+        if ent_type == ENT_TYPE.POSIS:
+            return ent
+        elif ent_type == ENT_TYPE.VERTS:
+            return self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+        elif ent_type == ENT_TYPE.EDGES:
+            verts = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)
+            return [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
+        elif ent_type == ENT_TYPE.WIRES:
+            edges = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)
+            verts = [self.graph.successors(edge, SIM._GRAPH_EDGE_TYPE.ENT)[0] for edge in edges]
+            posis = [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
+            last_vert = self.graph.successors(edges[-1], SIM._GRAPH_EDGE_TYPE.ENT)[1]
+            last_posi = self.graph.successors(last_vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            posis.append(last_posi)
+            return posis
+        elif ent_type == ENT_TYPE.POINTS:
+            vert = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            return self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+        elif ent_type == ENT_TYPE.PLINES:
+            wire = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)[0]
             edges = self.graph.successors(wire, SIM._GRAPH_EDGE_TYPE.ENT)
             verts = [self.graph.successors(edge, SIM._GRAPH_EDGE_TYPE.ENT)[0] for edge in edges]
-            wire_posis = [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
-            posis.append(wire_posis)
-        return posis
+            posis = [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
+            last_vert = self.graph.successors(edges[-1], SIM._GRAPH_EDGE_TYPE.ENT)[1]
+            last_posi = self.graph.successors(last_vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            posis.append(last_posi)
+            return posis
+        elif ent_type == ENT_TYPE.PGONS:
+            posis = []
+            for wire in self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT):
+                edges = self.graph.successors(wire, SIM._GRAPH_EDGE_TYPE.ENT)
+                verts = [self.graph.successors(edge, SIM._GRAPH_EDGE_TYPE.ENT)[0] for edge in edges]
+                wire_posis = [self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0] for vert in verts]
+                posis.append(wire_posis)
+            return posis
+        elif ent_type == ENT_TYPE.COLLS:
+            raise Exception('Not implemented') # TODO
     # ----------------------------------------------------------------------------------------------
-    def get_posi_coords(self, posi):
-        """Get the XYZ coordinates of a position
+    def get_ent_coords(self, ent):
+        """Get the XYZ coordinates of an entity
+
+        If the entity is a point, vertex, or position, then a single cooord is returned.
+        If the entity is a polyline, a list of coords will be returned.
+        For a closed polyline, the first and last coords will be the same.
+        If the entity is a polygon, a nested list of coords is returned.
+        If the entity is a collection, ... not mplemented
 
         :param posi: A position ID.
         :return: A list of three numbers, the XYZ coordinates.
         """
-        att_n = self._graph_attrib_node_name(ENT_TYPE.POSIS, 'xyz')
-        att_vals_n = self.graph.successor(posi, att_n)
-        return self.graph.get_node_props(att_vals_n).get('value')
-    # ----------------------------------------------------------------------------------------------
-    def get_vert_coords(self, vert):
-        """Get the XYZ coordinates of a vertex
-
-        :param vert: A vertex ID.
-        :return: A list of three numbers, the XYZ coordinates.
-        """
-        att_n = self._graph_attrib_node_name(ENT_TYPE.POSIS, 'xyz')
-        posis = self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)
-        att_vals_n = self.graph.successor(posis[0], att_n)
-        return self.graph.get_node_props(att_vals_n).get('value')
+        ent_type = self.graph.get_node_props(ent).get('ent_type')
+        xyz_att_n = self._graph_attrib_node_name(ENT_TYPE.POSIS, 'xyz')
+        if ent_type == ENT_TYPE.POSIS:
+            att_vals_n = self.graph.successor(ent, xyz_att_n)
+            return self.graph.get_node_props(att_vals_n).get('value')
+        elif ent_type == ENT_TYPE.VERTS:
+            posi = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            att_vals_n = self.graph.successor(posi, xyz_att_n)
+            return self.graph.get_node_props(att_vals_n).get('value')
+        elif ent_type == ENT_TYPE.POINTS:
+            vert = self.graph.successors(ent, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            posi = self.graph.successors(vert, SIM._GRAPH_EDGE_TYPE.ENT)[0]
+            att_vals_n = self.graph.successor(posi, xyz_att_n)
+            return self.graph.get_node_props(att_vals_n).get('value')
+        else:
+            posis = self.get_ent_posis(ent)
+            coords = []
+            for posi in posis:
+                att_vals_n = self.graph.successor(ent, xyz_att_n)
+                coords.append( self.graph.get_node_props(att_vals_n).get('value') )
+            return coords
     # ==============================================================================================
     # QUERY
     # ==============================================================================================
-    def pline_is_closed(self, pline):
+    def is_pline_closed(self, pline):
         """Check if a polyline is open or closed.
 
         :param pline: A polyline ID.
