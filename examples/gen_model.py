@@ -26,8 +26,8 @@ sm.add_coll_ent(coll, pline)
 sm.add_coll_ent(coll, pgon)
 
 # create attributes
-sm.add_attrib(ENT_TYPE.COLLS, "aaa", DATA_TYPE.LIST)
-sm.add_attrib(ENT_TYPE.PGONS, "bbb", DATA_TYPE.NUM)
+sm.add_attrib(ENT_TYPE.COLL, "aaa", DATA_TYPE.LIST)
+sm.add_attrib(ENT_TYPE.PGON, "bbb", DATA_TYPE.NUM)
 
 # set entity attrib value
 sm.set_attrib_val(coll, "aaa", [1,2,3,4,5,6])
@@ -42,10 +42,10 @@ sm.set_model_attrib_val("ccc", "This is a test")
 val3 = sm.get_model_attrib_val("ccc")
 
 # get the positions from the pgon
-val4 = sm.get_ents(ENT_TYPE.POSIS)
-val5 = sm.get_ents(ENT_TYPE.VERTS, pgon)
-val6 = sm.get_ents(ENT_TYPE.POSIS, pline)
-val7 = sm.get_ents(ENT_TYPE.COLLS, posi)
+val4 = sm.get_ents(ENT_TYPE.POSI)
+val5 = sm.get_ents(ENT_TYPE.VERT, pgon)
+val6 = sm.get_ents(ENT_TYPE.POSI, pline)
+val7 = sm.get_ents(ENT_TYPE.COLL, posi)
 
 # print("RESULT", val6)
 

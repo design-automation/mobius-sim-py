@@ -16,7 +16,7 @@ class TestAttribs(unittest.TestCase):
         m = sim.SIM()
         point1 = m.add_point( m.add_posi([1,2,3]) )
         point2 = m.add_point( m.add_posi([4,5,6]) )
-        m.add_attrib(ENT_TYPE.POINTS, 'test', DATA_TYPE.STR)
+        m.add_attrib(ENT_TYPE.POINT, 'test', DATA_TYPE.STR)
         m.set_attrib_val(point1, 'test', 'hello1')
         m.set_attrib_val(point2, 'test', 'hello2')
         m.set_model_attrib_val("a_sting", "hello")
@@ -26,21 +26,21 @@ class TestAttribs(unittest.TestCase):
         self.model = m
 
     def test_get_attribs(self):
-        atts1 = self.model.get_attribs(ENT_TYPE.POINTS)
-        atts2 = self.model.get_attribs(ENT_TYPE.POSIS)
-        atts3 = self.model.get_attribs(ENT_TYPE.PGONS)
+        atts1 = self.model.get_attribs(ENT_TYPE.POINT)
+        atts2 = self.model.get_attribs(ENT_TYPE.POSI)
+        atts3 = self.model.get_attribs(ENT_TYPE.PGON)
         self.assertEqual(list(atts1), ['test'])
         self.assertEqual(list(atts2), ['xyz'])
         self.assertEqual(list(atts3), [])
 
     def test_get_attrib_vals(self):
-        att_vals1 = self.model.get_attrib_vals(ENT_TYPE.POINTS, 'test')
-        att_vals2 = self.model.get_attrib_vals(ENT_TYPE.POSIS, 'xyz')
+        att_vals1 = self.model.get_attrib_vals(ENT_TYPE.POINT, 'test')
+        att_vals2 = self.model.get_attrib_vals(ENT_TYPE.POSI, 'xyz')
         self.assertEqual(list(att_vals1), ['hello1', 'hello2'])
         self.assertEqual(list(att_vals2), [[1,2,3], [4,5,6]])
 
     def test_get_point_attribs(self):
-        points = self.model.get_ents(ENT_TYPE.POINTS)
+        points = self.model.get_ents(ENT_TYPE.POINT)
         str1 = self.model.get_attrib_val(points[0], 'test')
         str2 = self.model.get_attrib_val(points[1], 'test')
         self.assertEqual(str1, 'hello1')

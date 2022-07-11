@@ -21,57 +21,57 @@ class TestPolygons(unittest.TestCase):
         self.model = m
 
     def test_get_pgon(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
         self.assertEqual(list(pgons), ['pg0'])
 
     def test_pgon_to_posis(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
-        posis = self.model.get_ents(ENT_TYPE.POSIS, pgons)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        posis = self.model.get_ents(ENT_TYPE.POSI, pgons)
         self.assertEqual(list(posis), ['ps0', 'ps1', 'ps2'])
 
     def test_pgon_to_verts(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
-        verts = self.model.get_ents(ENT_TYPE.VERTS, pgons)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        verts = self.model.get_ents(ENT_TYPE.VERT, pgons)
         self.assertEqual(list(verts), ['_v0', '_v1', '_v2'])
 
     def test_pgon_to_edges(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
-        edges = self.model.get_ents(ENT_TYPE.EDGES, pgons)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        edges = self.model.get_ents(ENT_TYPE.EDGE, pgons)
         self.assertEqual(list(edges), ['_e0', '_e1', '_e2'])
 
     def test_pgon_to_wires(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
-        wires = self.model.get_ents(ENT_TYPE.WIRES, pgons)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        wires = self.model.get_ents(ENT_TYPE.WIRE, pgons)
         self.assertEqual(list(wires), ['_w0'])
 
     def test_pgon_to_colls(self):
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
-        colls = self.model.get_ents(ENT_TYPE.COLLS, pgons)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        colls = self.model.get_ents(ENT_TYPE.COLL, pgons)
         self.assertEqual(list(colls), ['co0'])
 
     def test_posi_to_pgon(self):
-        posis = self.model.get_ents(ENT_TYPE.POSIS)
-        pgon = self.model.get_ents(ENT_TYPE.PGONS, posis[0])
+        posis = self.model.get_ents(ENT_TYPE.POSI)
+        pgon = self.model.get_ents(ENT_TYPE.PGON, posis[0])
         self.assertEqual(list(pgon), ['pg0'])
 
     def test_vert_to_pgon(self):
-        verts = self.model.get_ents(ENT_TYPE.VERTS)
-        pgon = self.model.get_ents(ENT_TYPE.PGONS, verts[0])
+        verts = self.model.get_ents(ENT_TYPE.VERT)
+        pgon = self.model.get_ents(ENT_TYPE.PGON, verts[0])
         self.assertEqual(list(pgon), ['pg0'])
 
     def test_edge_to_pgon(self):
-        edges = self.model.get_ents(ENT_TYPE.EDGES)
-        pgon = self.model.get_ents(ENT_TYPE.PGONS, edges[0])
+        edges = self.model.get_ents(ENT_TYPE.EDGE)
+        pgon = self.model.get_ents(ENT_TYPE.PGON, edges[0])
         self.assertEqual(list(pgon), ['pg0'])
 
     def test_wire_to_pgon(self):
-        wires = self.model.get_ents(ENT_TYPE.WIRES)
-        pgon = self.model.get_ents(ENT_TYPE.PGONS, wires[0])
+        wires = self.model.get_ents(ENT_TYPE.WIRE)
+        pgon = self.model.get_ents(ENT_TYPE.PGON, wires[0])
         self.assertEqual(list(pgon), ['pg0'])
 
     def test_coll_to_pgon(self):
-        colls = self.model.get_ents(ENT_TYPE.COLLS)
-        pgon = self.model.get_ents(ENT_TYPE.PGONS, colls[0])
+        colls = self.model.get_ents(ENT_TYPE.COLL)
+        pgon = self.model.get_ents(ENT_TYPE.PGON, colls[0])
         self.assertEqual(list(pgon), ['pg0'])
 
 if __name__ == '__main__':

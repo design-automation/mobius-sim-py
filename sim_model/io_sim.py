@@ -23,14 +23,14 @@ def export_sim_data(sim_model):
     :return: JSON data.
     """
     # get entities from graph
-    posi_ents = sim_model.get_ents(ENT_TYPE.POSIS)
-    vert_ents = sim_model.get_ents(ENT_TYPE.VERTS)
-    edge_ents = sim_model.get_ents(ENT_TYPE.EDGES)
-    wire_ents = sim_model.get_ents(ENT_TYPE.WIRES)
-    point_ents = sim_model.get_ents(ENT_TYPE.POINTS)
-    pline_ents = sim_model.get_ents(ENT_TYPE.PLINES)
-    pgon_ents = sim_model.get_ents(ENT_TYPE.PGONS)
-    coll_ents = sim_model.get_ents(ENT_TYPE.COLLS)
+    posi_ents = sim_model.get_ents(ENT_TYPE.POSI)
+    vert_ents = sim_model.get_ents(ENT_TYPE.VERT)
+    edge_ents = sim_model.get_ents(ENT_TYPE.EDGE)
+    wire_ents = sim_model.get_ents(ENT_TYPE.WIRE)
+    point_ents = sim_model.get_ents(ENT_TYPE.POINT)
+    pline_ents = sim_model.get_ents(ENT_TYPE.PLINE)
+    pgon_ents = sim_model.get_ents(ENT_TYPE.PGON)
+    coll_ents = sim_model.get_ents(ENT_TYPE.COLL)
     # create maps for entity name -> entity index
     posis_dict = dict( zip(posi_ents, range(len(posi_ents))) )
     verts_dict = dict( zip(vert_ents, range(len(vert_ents))) )
@@ -42,7 +42,7 @@ def export_sim_data(sim_model):
     colls_dict = dict( zip(coll_ents, range(len(coll_ents))) )
     # create the geometry data
     geometry = {
-        'num_posis': sim_model.num_ents(ENT_TYPE.POSIS),
+        'num_posis': sim_model.num_ents(ENT_TYPE.POSI),
         'points': [],
         'plines': [],
         'pgons': [],
@@ -62,16 +62,16 @@ def export_sim_data(sim_model):
         geometry['pgons'].append([[posis_dict[posi_i] for posi_i in posis_i] for posis_i in wires_posis_i])
     for coll_ent in coll_ents:
         # points
-        coll_points = sim_model.get_ents(ENT_TYPE.POINTS, coll_ent)
+        coll_points = sim_model.get_ents(ENT_TYPE.POINT, coll_ent)
         geometry['coll_points'].append([points_dict[point] for point in coll_points])
         # plines
-        coll_plines = sim_model.get_ents(ENT_TYPE.PLINES, coll_ent)
+        coll_plines = sim_model.get_ents(ENT_TYPE.PLINE, coll_ent)
         geometry['coll_plines'].append([plines_dict[pline] for pline in coll_plines])
         # pgons
-        coll_pgons = sim_model.get_ents(ENT_TYPE.PGONS, coll_ent)
+        coll_pgons = sim_model.get_ents(ENT_TYPE.PGON, coll_ent)
         geometry['coll_pgons'].append([pgons_dict[pgon] for pgon in coll_pgons])
         # colls
-        coll_colls = sim_model.get_ents(ENT_TYPE.COLLS, coll_ent)
+        coll_colls = sim_model.get_ents(ENT_TYPE.COLL, coll_ent)
         geometry['coll_colls'].append([colls_dict[coll] for coll in coll_colls])
     # create the attribute data
     def _attribData(ent_type, ent_dict):
@@ -90,14 +90,14 @@ def export_sim_data(sim_model):
             attribs_data.append(data)
         return attribs_data
     attributes = {
-        'posis': _attribData(ENT_TYPE.POSIS, posis_dict),
-        'verts': _attribData(ENT_TYPE.VERTS, verts_dict),
-        'edges': _attribData(ENT_TYPE.EDGES, edges_dict),
-        'wires': _attribData(ENT_TYPE.WIRES, wires_dict),
-        'points': _attribData(ENT_TYPE.POINTS, points_dict),
-        'plines': _attribData(ENT_TYPE.PLINES, plines_dict),
-        'pgons': _attribData(ENT_TYPE.PGONS, pgons_dict),
-        'colls': _attribData(ENT_TYPE.COLLS, colls_dict),
+        'posis': _attribData(ENT_TYPE.POSI, posis_dict),
+        'verts': _attribData(ENT_TYPE.VERT, verts_dict),
+        'edges': _attribData(ENT_TYPE.EDGE, edges_dict),
+        'wires': _attribData(ENT_TYPE.WIRE, wires_dict),
+        'points': _attribData(ENT_TYPE.POINT, points_dict),
+        'plines': _attribData(ENT_TYPE.PLINE, plines_dict),
+        'pgons': _attribData(ENT_TYPE.PGON, pgons_dict),
+        'colls': _attribData(ENT_TYPE.COLL, colls_dict),
         'model': [
             [att_name, sim_model.get_model_attrib_val(att_name)] 
             for att_name in sim_model.get_model_attribs()
@@ -163,14 +163,14 @@ def import_sim_data(sim_model, json_data):
             sim_model.add_coll_ent(coll, 'co' + str(child_coll_i))
     # entity attribs
     ent_types_prefix = [
-        [ENT_TYPE.POSIS, 'ps'],
-        [ENT_TYPE.VERTS, '_v'],
-        [ENT_TYPE.EDGES, '_e'],
-        [ENT_TYPE.WIRES, '_w'],
-        [ENT_TYPE.POINTS, 'pt'],
-        [ENT_TYPE.PLINES, 'pl'],
-        [ENT_TYPE.PGONS, 'pg'],
-        [ENT_TYPE.COLLS, 'co']
+        [ENT_TYPE.POSI, 'ps'],
+        [ENT_TYPE.VERT, '_v'],
+        [ENT_TYPE.EDGE, '_e'],
+        [ENT_TYPE.WIRE, '_w'],
+        [ENT_TYPE.POINT, 'pt'],
+        [ENT_TYPE.PLINE, 'pl'],
+        [ENT_TYPE.PGON, 'pg'],
+        [ENT_TYPE.COLL, 'co']
     ]
     for ent_type, ent_prefix in ent_types_prefix:
         for attrib in json_data['attributes'][ent_type]:

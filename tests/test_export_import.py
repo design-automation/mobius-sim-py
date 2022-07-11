@@ -45,7 +45,7 @@ class TestImport(unittest.TestCase):
         # import a file
         io_sim.import_sim_file(self.model, './pgons_18.sim')
         # check 
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
         self.assertEqual(len(pgons), 18)
 
     def test_export_import_sim_data(self):
@@ -56,15 +56,15 @@ class TestImport(unittest.TestCase):
         # import
         io_sim.import_sim_data(self.model, sim_data)
         # check
-        posis = self.model.get_ents(ENT_TYPE.POSIS)
+        posis = self.model.get_ents(ENT_TYPE.POSI)
         self.assertEqual(len(posis), 8)
-        points = self.model.get_ents(ENT_TYPE.POINTS)
+        points = self.model.get_ents(ENT_TYPE.POINT)
         self.assertEqual(len(points), 2)
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
         self.assertEqual(len(plines), 4)
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
         self.assertEqual(len(pgons), 2)
-        colls = self.model.get_ents(ENT_TYPE.COLLS)
+        colls = self.model.get_ents(ENT_TYPE.COLL)
         self.assertEqual(len(colls), 2)
 
     def test_export_import_sim_str(self):
@@ -75,15 +75,15 @@ class TestImport(unittest.TestCase):
         # import
         io_sim.import_sim(self.model, sim_str)
         # check
-        posis = self.model.get_ents(ENT_TYPE.POSIS)
+        posis = self.model.get_ents(ENT_TYPE.POSI)
         self.assertEqual(len(posis), 8)
-        points = self.model.get_ents(ENT_TYPE.POINTS)
+        points = self.model.get_ents(ENT_TYPE.POINT)
         self.assertEqual(len(points), 2)
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
         self.assertEqual(len(plines), 4)
-        pgons = self.model.get_ents(ENT_TYPE.PGONS)
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
         self.assertEqual(len(pgons), 2)
-        colls = self.model.get_ents(ENT_TYPE.COLLS)
+        colls = self.model.get_ents(ENT_TYPE.COLL)
         self.assertEqual(len(colls), 2)
 
     def test_import_model_attribs(self):

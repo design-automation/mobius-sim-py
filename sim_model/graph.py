@@ -11,24 +11,6 @@ class Graph(object):
     # the graph is created using a sigle dict of nodes and multiple dicts of edges
     # 
     # for each edge type, there are two dicts, forward and reverse
-    # these edges dicts vary based on the edge type
-    # 
-    # M2M forward: key = start node, value = [end nodes]
-    # M2M reverse: key = start node, value = [end nodes]
-    # 
-    # M2O forward: key = start node, value = single end node
-    # M2O reverse: key = start node, value = [end nodes]
-    # 
-    # O2M forward: key = start node, value = [end nodes]
-    # O2M reverse: key = start node, value = single end node
-    # 
-    # O2O forward: key = start node, value = single end node
-    # O2O reverse: key = start node, value = single end node
-    #
-    O2O = 'o2o' # one to one
-    M2M = 'm2m' # many to many
-    M2O = 'm2o' # many to one
-    O2M = 'o2m' # one to many
     FWD = 0
     REV = 1
     # ==============================================================================================
@@ -37,8 +19,8 @@ class Graph(object):
     def __init__(self):
         # nodes
         self._nodes = OrderedDict() # key is node name, value is dict of properties
-        # edge_types, key is edge_type, value is x2x (M2M, M2O, O2M, O2O)
-        self._edge_types = dict() 
+        # edge_types, key is edge_type, value is boolean
+        self._edges_reversed = dict() 
         # edges, nested dictionaries four levels deep
         # first level is the snapshot dict, key is the ssid, value is an OrderedDict
         # second level for each ssid, key is the edge_type, value is an dict
@@ -46,224 +28,238 @@ class Graph(object):
         # fourth level, for each edge_type, key is a start node, value is a list of end nodes
         self._edges = dict()
         # init snapshot 0
-        self._edges[0] = OrderedDict() 
+        self._edges[0] = OrderedDict() #TODO does this need to be ordered?
         self._curr_ssid = 0
     # ==============================================================================================
     # METHODS
     # ==============================================================================================
-    def add_node(self, node, **props):
+    def add_node(self, node):
         """
         Add a node to the graph. Throws an error if the node already exists.
 
-        :param n: the name of the node, a string
-        :param props: node properties, a dictionary of key-value pairs
+        :param node: (str) The name of the node.
         :return: No value.
         """
         if node in self._nodes:
             raise Exception('Node already exists.')
-        self._nodes[node] = props
+        self._nodes[node] = dict()
     # ----------------------------------------------------------------------------------------------
-    def get_node_props(self, node):
+    def set_node_prop(self, node, prop_name, prop_value):
         """
-        Get the properties of a node in the graph. Throws an error is the node does not exist.
+        Set the value of a property of a node. 
+        Throws an error if the node does not exist.
 
-        :param n: the name of the node, a string
-        :return: A dictionary of node properties.
+        :param node: (str) The name of the node.
+        :param prop_name: (str) The name of the property.
+        :param prop_value (any) The value of the property.
+        :return: No value
         """
         if not node in self._nodes:
             raise Exception('Node does not exist.')
-        return self._nodes[node]
+        self._nodes[node][prop_name] = prop_value
+    # ----------------------------------------------------------------------------------------------
+    def get_node_prop(self, node, prop_name):
+        """
+        Get the value of a property of a node . 
+        Throws an error if the node does not exist.
+
+        :param node: (string) The name of the node.
+        :param prop_name: (string) The name of the property.
+        :return: (any) The value of the property.
+        """
+        if not node in self._nodes:
+            raise Exception('Node does not exist.')
+        return self._nodes[node][prop_name]
+    # ----------------------------------------------------------------------------------------------
+    def get_node_prop_names(self, node):
+        """
+        Get the names of all the properties of a node in the graph. 
+        Throws an error if the node does not exist.
+
+        :param node: (string) The name of the node.
+        :return: (string[]) A list of property names.
+        """
+        if not node in self._nodes:
+            raise Exception('Node does not exist.')
+        return list(self._nodes[node].keys())
+    # ----------------------------------------------------------------------------------------------
+    def get_nodes(self):
+        """
+        Get a list of all nodes.
+
+        :return: (str[]) A list of node names.
+        """        
+        # get the nodes
+        return list(self._nodes.keys())
     # ----------------------------------------------------------------------------------------------
     def get_nodes_with_out_edge(self, edge_type, ssid = None):
         """
         Get a list of nodes that have an outgoing edge of type edge_type.
 
-        :param edge_type: the edge type
-        :return: A list of node names.
+        :param edge_type: (str) The edge type.
+        :return: (str[]) A list of node names.
         """        
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
         # get the nodes
-        return self._edges[ssid][edge_type][Graph.FWD].keys()
+        return list(self._edges[ssid][edge_type][Graph.FWD].keys())
     # ----------------------------------------------------------------------------------------------
     def get_nodes_with_in_edge(self, edge_type, ssid = None):
         """
         Get a list of nodes that have an incoming edge of type edge_type.
 
-        :param edge_type: the edge type
-        :return: A list of node names.
+        :param edge_type: (str) The edge type.
+        :return: (str[]) A list of node names.
         """        
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
         # get the nodes
-        return self._edges[ssid][edge_type][Graph.REV].keys()
+        return list(self._edges[ssid][edge_type][Graph.REV].keys())
     # ----------------------------------------------------------------------------------------------
     def has_node(self, node):
         """
         Return True if the node n exists in the graph.
 
-        :param n: the name of the node, a string
-        :return: True or False
+        :param node: (string) The name of the node.
+        :return: (bool) True or False.
         """
         return node in self._nodes
     # ----------------------------------------------------------------------------------------------
-    def add_edge(self, node0, node1, edge_type):
+    def add_edge(self, node0, node1, edge_type, ssid = None):
         """
         Add an edge to the graph, from node 0 to node 1.
 
-        :param n0: the name of the start node
-        :param n1: the name of the end node
-        :param edge_type: the edge type
+        :param node0: (str) The name of the start node.
+        :param node1: (str) The name of the end node.
+        :param edge_type: (str) The edge type.
         :return: No value.
         """
         if not node0 in self._nodes and node1 in self._nodes:
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
-        # add edge from n0 to n1
-        if node0 in self._edges[self._curr_ssid][edge_type][Graph.FWD]:
-            self._edges[self._curr_ssid][edge_type][Graph.FWD][node0].append( node1 )
-        else:
-            self._edges[self._curr_ssid][edge_type][Graph.FWD][node0] = [node1]
-        # add rev edge from n1 to n0
-        if node1 in self._edges[self._curr_ssid][edge_type][Graph.REV]:
-            self._edges[self._curr_ssid][edge_type][Graph.REV][node1].append( node0 )
-        else:
-            self._edges[self._curr_ssid][edge_type][Graph.REV][node1] = [node0]
+        # get ssid
+        if ssid == None: ssid = self._curr_ssid
+        # get the edges
+        if edge_type not in self._edges[ssid]:
+            edges = dict()
+            edges[Graph.FWD] = OrderedDict()
+            if (self._edges_reversed.get(edge_type)):
+                edges[Graph.REV] = OrderedDict()
+            self._edges.get(ssid)[edge_type] = edges
+        edges = self._edges[ssid][edge_type]
+        # =====
+        # Prior to 3.7 sets in python do not maintain order.
+        # We can use the keys in an ordered dict as an ordered set.
+        # We set the value to None.
+        # =====
+        # add edge from node0 to node1
+        edge_fwd = self._edges[ssid][edge_type][Graph.FWD]
+        if node0 not in edge_fwd:
+            edge_fwd[node0] = OrderedDict() # ORDERED DICT
+        edge_fwd[node0][node1] = None # ADD TO ORDERED DICT
+        
+        # add rev edge from node1 to node0
+        if self._edges_reversed.get(edge_type):
+            edge_rev = self._edges[ssid][edge_type][Graph.REV]
+            if node1 not in edge_rev:
+                edge_rev[node1] = OrderedDict() # ORDERED DICT
+            edge_rev[node1][node0] = None # ADD TO ORDERED DICT
+    # ----------------------------------------------------------------------------------------------
+    def del_edge(self, node0, node1, edge_type, ssid = None):
+        """
+        Delete the edge from node0 to node1.
+        If `node0` is null, then all edges ending at `node1` will be deleted.
+        If `node1` is null, then all edges starting at `node0` will be deleted.
+        If the edge does not exists, then no error is thrown. 
+
+        :param node0: (str) The name of the start node.
+        :param node1: (str) The name of the end node.
+        :param edge_type: (str) The edge type.
+        :return: No value.
+        """
+        raise Exception('Not implemented;')
     # ----------------------------------------------------------------------------------------------
     def has_edge(self, node0, node1, edge_type, ssid = None):
         """
-        Return True if an edge from n0 to n1 exists in the graph.
+        Return True if an edge from node0 to node1 exists in the graph.
 
-        :param n0: the name of the start node
-        :param n1: the name of the end node
-        :param edge_type: the edge type
-        :return: True if the edge exists, false otherwise..
+        :param node0: (str) The name of the start node.
+        :param node1: (str) The name of the end node.
+        :param edge_type: (str) The edge type.
+        :return: (bool) True if the edge exists, false otherwise.
         """
         if not node0 in self._nodes and node1 in self._nodes:
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
-        # check if edge exists
-        if not node0 in self._edges[ssid][edge_type][Graph.FWD]:
+        # get ssid
+        if ssid == None: ssid = self._curr_ssid
+        # check if no edges of edge_type
+        if edge_type not in self._edges[ssid]:
             return False
-        return node1 in self._edges[ssid][edge_type][Graph.FWD][node0]
+        # get edges
+        edges_fwd = self._edges[ssid][edge_type][Graph.FWD]
+        # check if edge exists
+        if node0 not in edges_fwd:
+            return False
+        return node1 in edges_fwd[node0]
     # ----------------------------------------------------------------------------------------------
-    def add_edge_type(self, edge_type, x2x):
+    def add_edge_type(self, edge_type, rev, ssid = None):
         """
         Add an edge type to the graph.
 
-        :param edge_type: the edge type
-        :param x2x: one of 'm2m', 'm2o', 'o2m', 'o2o'
+        :param edge_type: (str) The edge type.
+        :param rev: (bool) If True, reverse edges are geenrated.
         :return: No value.
         """
-        if edge_type in self._edge_types:
+        if edge_type in self._edges_reversed:
             raise Exception('Edge type already exists.')
-        self._edge_types[edge_type] = x2x
-        self._edges[self._curr_ssid][edge_type] = dict()
-        self._edges[self._curr_ssid][edge_type][Graph.FWD] = OrderedDict()
-        self._edges[self._curr_ssid][edge_type][Graph.REV] = OrderedDict()
+        # get ssid
+        if ssid == None: ssid = self._curr_ssid
+        # add edge type
+        self._edges_reversed[edge_type] = rev
+        # self._edges[ssid][edge_type] = dict()
     # ----------------------------------------------------------------------------------------------
     def has_edge_type(self, edge_type):
         """
         Return True if the edge type exists in the graph.
 
-        :param edge_type: the edge type
-        :return: True if the edge type exists, false otherwise.
+        :param edge_type: (str) The edge type.
+        :return: (bool) True if the edge type exists, false otherwise.
         """
-        return edge_type in self._edge_types
-    # ----------------------------------------------------------------------------------------------
-    def successor(self, node, edge_type, ssid = None):
-        """
-        Get one successor of a node in the graph.
-        The node 'n' is linked to a successor by a forward edge of type 'edge_type'.
-
-        If there are no successors, then None is returned.
-
-        If the edge type ends in 'm' (i.e. 'm2m' or 'o2m'), then an error is thrown.
-
-        :param n: the name of the node from which to find successors
-        :param edge_type: the edge type
-        :return: A single node name.
-        """
-        if not node in self._nodes :
-            raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
-            raise Exception('Edge type does not exist.')
-        # get the edge x2x
-        x2x = self._edge_types[edge_type]
-        if x2x in [Graph.M2M, Graph.O2M]:
-            raise Exception('Edge type has multiple successors.')
-        # get ssid
-        if ssid == None: ssid = self._curr_ssid
-        # get successor
-        if node not in self._edges[ssid][edge_type][Graph.FWD]:
-            return None
-        if len(self._edges[ssid][edge_type][Graph.FWD][node]) == 0:
-            return None
-        return self._edges[ssid][edge_type][Graph.FWD][node][0]
+        return edge_type in self._edges_reversed
     # ----------------------------------------------------------------------------------------------
     def successors(self, node, edge_type, ssid = None):
         """
         Get multiple successors of a node in the graph.
-        The node 'n' is linked to each successor by a forward edge of type 'edge_type'.
+        The 'node' is linked to each successor by a forward edge of type 'edge_type'.
 
         If there are no successors, then an empty list is returned.
 
-        If the edge type ends in 'o' (i.e. 'm2o' or 'o2o'), then an error is thrown.
-
-        :param n: the name of the node from which to find successors
-        :param edge_type: the edge type
-        :return: A list of nodes names.
+        :param node: (str) The name of the node from which to find successors.
+        :param edge_type: (str) The edge type.
+        :return: (str[]) A list of nodes names.
         """
         if not node in self._nodes :
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
-        # get the edge x2x
-        x2x = self._edge_types[edge_type]
-        if x2x in [Graph.M2O, Graph.O2O]:
-            raise Exception('Edge type has one successor.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
-        # get successors
-        if node not in self._edges[ssid][edge_type][Graph.FWD]:
+        # check if no edges of edge_type
+        if edge_type not in self._edges[ssid]:
             return []
-        return self._edges[ssid][edge_type][Graph.FWD][node]
-# ----------------------------------------------------------------------------------------------
-    def predecessor(self, node, edge_type, ssid = None):
-        """
-        Get one predecessors of a node in the graph.
-        The node 'n' is linked to a predecessor by a reverse edge of type 'edge_type'.
-
-        If there are no predecessors, then None returned.
-
-        If the edge type starts with 'm' (i.e. 'm2m' or 'm2o'), then an error is thrown.
-
-        :param n: the name of the node from which to find predecessors
-        :param edge_type: the edge type
-        :return: A single node name.
-        """
-        if not node in self._nodes :
-            raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
-            raise Exception('Edge type does not exist.')
-        # get the edge x2x
-        x2x = self._edge_types[edge_type]
-        if x2x in [Graph.M2M, Graph.M2O]:
-            raise Exception('Edge type has multiple predecessors.')
-        # get ssid
-        if ssid == None: ssid = self._curr_ssid
-        # get the predecessor
-        if node not in self._edges[ssid][edge_type][Graph.REV]:
-            return None
-        if len(self._edges[ssid][edge_type][Graph.REV][node]) == 0:
-            return None
-        return self._edges[ssid][edge_type][Graph.REV][node][0]
+        # get edges
+        edges = self._edges[ssid][edge_type]
+        # get successors
+        if node not in edges[Graph.FWD]:
+            return []
+        return list(edges[Graph.FWD][node])
     # ----------------------------------------------------------------------------------------------
     def predecessors(self, node, edge_type, ssid = None):
         """
@@ -274,87 +270,199 @@ class Graph(object):
 
         If the edge type starts with 'o' (i.e. 'o2o' or 'o2m'), then an error is thrown.
 
-        :param n: the name of the node from which to find predecessors
-        :param edge_type: the edge type
-        :return: A list of nodes names, or a single node name.
+        :param node: (str) The name of the node from which to find predecessors.
+        :param edge_type: (str) The edge type.
+        :return: (str[]) A list of nodes names, or a single node name.
         """
         if not node in self._nodes :
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
-        # get the edge x2x
-        x2x = self._edge_types[edge_type]
-        if x2x in [Graph.O2M, Graph.O2O]:
-            raise Exception('Edge type has one predecessor.')
+        if not self._edges_reversed[edge_type] :
+            raise Exception('Edge types "' + edge_type + '" does not have reverse edges.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
-        # get predecessors
-        if node not in self._edges[ssid][edge_type][Graph.REV]:
+        # check if no edges of edge_type
+        if edge_type not in self._edges[ssid]:
             return []
-        return self._edges[ssid][edge_type][Graph.REV][node]
+        # get edges
+        edges = self._edges[ssid][edge_type]
+        # get predecessors
+        if node not in edges[Graph.REV]:
+            return []
+        return list(edges[Graph.REV][node])
+    # ----------------------------------------------------------------------------------------------
+    def set_successors(self, node0, nodes1, edge_type, ssid = None):
+        """
+        Advanced low level method - this can break graph consistency. Creates multiple edges by
+        manually specifying the successors of a node. An existing successors will be overwritten. If
+        this edge_type has reverse edges, then care needs to be taken to also update the
+        predecessors.
+
+        :param node0: (str) The name of the start node
+        :param nodes1: (str) A list of names of sucessor nodes.
+        :param edge_type: (str) The edge type.
+        :return: No value.
+        """
+        raise Exception('Not implemented;')
+    # ----------------------------------------------------------------------------------------------
+    def set_predeccessors(self, node1, nodes0, edge_type, ssid = None):
+        """
+        Advanced low level method - this can break graph consistency. Creates multiple edges by
+        manually specifying the successors of a node. An existing successors will be overwritten. If
+        this edge_type has reverse edges, then care needs to be taken to also update the
+        predecessors.
+
+        :param node1: (str) The name of the end node
+        :param nodes1: (str) A list of names of predecessor nodes.
+        :param edge_type: (str) The edge type.
+        :return: No value.
+        """
+        raise Exception('Not implemented;')
     # ----------------------------------------------------------------------------------------------
     def degree_in(self, node, edge_type, ssid = None):
         """
         Count the the number of incoming edges.
         The 'in degree' is the number of reverse edges of type 'ent_type' linked to node 'n'.
 
-        :param n: the name of the node for which to count incoming edges
-        :param edge_type: the edge type
-        :return: An integer, the number of incoming edges.
+        :param node: (str) The name of the node for which to count incoming edges.
+        :param edge_type: (str) The edge type.
+        :return: (int) The number of incoming edges.
         """
         if not node in self._nodes :
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
+        if not self._edges_reversed[edge_type] :
+            raise Exception('Edge types "' + edge_type + '" does not have reverse edges.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
-        # calc reverse degree
-        if node not in self._edges[ssid][edge_type][Graph.REV]:
+        # check if no edges of edge_type
+        if edge_type not in self._edges[ssid]:
             return 0
-        return len(self._edges[ssid][edge_type][Graph.REV][node])
+        # get edges
+        edges = self._edges[ssid][edge_type]
+        # calc reverse degree
+        if node not in edges[Graph.REV]:
+            return 0
+        return len(edges[Graph.REV][node])
     # ----------------------------------------------------------------------------------------------
     def degree_out(self, node, edge_type, ssid = None):
         """
         Count the the number of outgoing edges.
         The 'out degree' is the number of forward edges of type 'ent_type' linked to node 'n'.
 
-        :param n: the name of the node for which to count outgoing edges
-        :param edge_type: the edge type
-        :return: An integer, the number of outgoing edges.
+        :param node: (str) The name of the node for which to count outgoing edges
+        :param edge_type: (str) The edge type.
+        :return: (int) The number of outgoing edges.
         """        
         if not node in self._nodes :
             raise Exception('Node does not exist.')
-        if not edge_type in self._edge_types :
+        if not edge_type in self._edges_reversed :
             raise Exception('Edge type does not exist.')
         # get ssid
         if ssid == None: ssid = self._curr_ssid
-        # calc forward degree
-        if node not in self._edges[ssid][edge_type][Graph.FWD]:
+        # check if no edges of edge_type
+        if edge_type not in self._edges[ssid]:
             return 0
-        return len(self._edges[ssid][edge_type][Graph.FWD][node])
+        # get edges
+        edges = self._edges[ssid][edge_type]
+        # calc forward degree
+        if node not in edges[Graph.FWD]:
+            return 0
+        return len(edges[Graph.FWD][node])
     # ----------------------------------------------------------------------------------------------
     def degree(self, node, edge_type):
         """
         Count the the total number of incoming and outgoing edges.
 
-        :param n: the name of the node for which to count edges
-        :param edge_type: the edge type
-        :return: An integer, the number of edges.
+        :param node: (str) The name of the node for which to count edges
+        :param edge_type: (str) The edge type.
+        :return: (int) The number of edges.
         """
         # return result
         return self.degree_in(node, edge_type) + self.degree_out(node, edge_type)
     # ----------------------------------------------------------------------------------------------
-    def snapshot(self):
+    def new_snapshot(self, ssid = None):
         """
-        Takes a snapshot of the current set of edges in the graph.
+        Start a new snapshot of the edges .
+        If `ssid` is None, the the new snapshot will be empty.
 
-        :return: An integer, the ssid of the current snapshot.
+        :param: (int | None) The ID of an existing snapshot, or None.
+        :return:(int) The ssid of the current snapshot.
         """
-        # return result
-        prev_ssid = self._curr_ssid
         self._curr_ssid += 1
-        self._edges[self._curr_ssid] = copy.deepcopy(self._edges[prev_ssid])
-        return prev_ssid
+        if ssid == None:
+            # create a new empty snapshot
+            self._edges[self._curr_ssid] =  OrderedDict()
+        else:
+            # create a deep copy of the edge in an existing snapshot
+            self._edges[self._curr_ssid] = copy.deepcopy(self._edges.get(ssid))
+        return self._curr_ssid
+    # ----------------------------------------------------------------------------------------------
+    def get_active_snapshot(self):
+        """
+        Get the ID of the current active snapshot.
+
+        :return: (int) The ssid of the current snapshot.
+        """
+        return self._curr_ssid
+    # ----------------------------------------------------------------------------------------------
+    def set_active_snapshot(self, ssid):
+        """
+        Set the ID of the current active snapshot.
+        If the snapshot ID does not exist, an error will be thrown.
+
+        :param ssid: (int) The ssid of an existing snapshot.
+        :return: No value.
+        """
+        if not ssid in self._edges:
+            raise Exception('Snapshot ID does not exist.');
+        self._curr_ssid = ssid
+    # ----------------------------------------------------------------------------------------------
+    def clear_snapshot(self, ssid = None):
+        """
+        Clear all edges in the current active snapshot.
+
+        :return: No value.
+        """
+        # get ssid
+        if ssid == None: ssid = self._curr_ssid
+        # create a new dict
+        self._edges[self._curr_ssid] = OrderedDict()
+        
+    # ----------------------------------------------------------------------------------------------
+    def to_string(self):
+        """
+        Creates a human-readable string representation of the graph, for debugging.
+
+        :return: A string representation of the graph.
+        """
+        info = '\n\n=GRAPH=\n'
+        info += 'NODES = ' + str(self.get_nodes()) + '\n'
+        for ssid, edge_types_map in self._edges.items():
+            info += 'SSID = ' + str(ssid) + '\n'
+            for edge_type, fr_edges_map in edge_types_map.items():
+                info += '    EDGE TYPE = ' + edge_type + ', reverse = ' + \
+                    str(self._edges_reversed[edge_type]) + '\n'
+                if Graph.FWD in fr_edges_map:
+                    # fwd edges
+                    for start, end in fr_edges_map[Graph.FWD].items():
+                        info += '      FWD EDGE: ' + start + ' -> '
+                        if type(end) is set:
+                            info += '[' + str(list(end)) + ']\n'
+                        else:
+                            info += end + '\n'
+                    # rev edges
+                    if self._edges_reversed[edge_type]:
+                        for start, end in fr_edges_map[Graph.REV].items():
+                            info += '      REV EDGE: '
+                            if type(end) is set:
+                                info += '[' + str(list(end)) + ']'
+                            else:
+                                info += end
+                            info += ' <- ' + start + '\n'
+        return info
 # ==================================================================================================
 # END GRAPH CLASS
 # ==================================================================================================

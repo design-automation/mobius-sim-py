@@ -22,57 +22,57 @@ class TestClosedPolylines(unittest.TestCase):
         self.model = m
 
     def test_get_pline(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
         self.assertEqual(list(plines), ['pl0'])
 
     def test_pline_to_posis(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
-        posis = self.model.get_ents(ENT_TYPE.POSIS, plines)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
+        posis = self.model.get_ents(ENT_TYPE.POSI, plines)
         self.assertEqual(list(posis), ['ps0', 'ps1', 'ps2'])
 
     def test_pline_to_verts(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
-        verts = self.model.get_ents(ENT_TYPE.VERTS, plines)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
+        verts = self.model.get_ents(ENT_TYPE.VERT, plines)
         self.assertEqual(list(verts), ['_v0', '_v1', '_v2'])
 
     def test_pline_to_edges(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
-        edges = self.model.get_ents(ENT_TYPE.EDGES, plines)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
+        edges = self.model.get_ents(ENT_TYPE.EDGE, plines)
         self.assertEqual(list(edges), ['_e0', '_e1', '_e2'])
 
     def test_pline_to_wires(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
-        wires = self.model.get_ents(ENT_TYPE.WIRES, plines)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
+        wires = self.model.get_ents(ENT_TYPE.WIRE, plines)
         self.assertEqual(list(wires), ['_w0'])
 
     def test_pline_to_colls(self):
-        plines = self.model.get_ents(ENT_TYPE.PLINES)
-        colls = self.model.get_ents(ENT_TYPE.COLLS, plines)
+        plines = self.model.get_ents(ENT_TYPE.PLINE)
+        colls = self.model.get_ents(ENT_TYPE.COLL, plines)
         self.assertEqual(list(colls), ['co0'])
 
     def test_posi_to_pline(self):
-        posis = self.model.get_ents(ENT_TYPE.POSIS)
-        pline = self.model.get_ents(ENT_TYPE.PLINES, posis[0])
+        posis = self.model.get_ents(ENT_TYPE.POSI)
+        pline = self.model.get_ents(ENT_TYPE.PLINE, posis[0])
         self.assertEqual(list(pline), ['pl0'])
 
     def test_vert_to_pline(self):
-        verts = self.model.get_ents(ENT_TYPE.VERTS)
-        pline = self.model.get_ents(ENT_TYPE.PLINES, verts[0])
+        verts = self.model.get_ents(ENT_TYPE.VERT)
+        pline = self.model.get_ents(ENT_TYPE.PLINE, verts[0])
         self.assertEqual(list(pline), ['pl0'])
 
     def test_edge_to_pline(self):
-        edges = self.model.get_ents(ENT_TYPE.EDGES)
-        pline = self.model.get_ents(ENT_TYPE.PLINES, edges[0])
+        edges = self.model.get_ents(ENT_TYPE.EDGE)
+        pline = self.model.get_ents(ENT_TYPE.PLINE, edges[0])
         self.assertEqual(list(pline), ['pl0'])
 
     def test_wire_to_pline(self):
-        wires = self.model.get_ents(ENT_TYPE.WIRES)
-        pline = self.model.get_ents(ENT_TYPE.PLINES, wires[0])
+        wires = self.model.get_ents(ENT_TYPE.WIRE)
+        pline = self.model.get_ents(ENT_TYPE.PLINE, wires[0])
         self.assertEqual(list(pline), ['pl0'])
 
     def test_coll_to_pline(self):
-        colls = self.model.get_ents(ENT_TYPE.COLLS)
-        pline = self.model.get_ents(ENT_TYPE.PLINES, colls[0])
+        colls = self.model.get_ents(ENT_TYPE.COLL)
+        pline = self.model.get_ents(ENT_TYPE.PLINE, colls[0])
         self.assertEqual(list(pline), ['pl0'])
 
 if __name__ == '__main__':
