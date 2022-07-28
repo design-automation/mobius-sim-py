@@ -22,10 +22,10 @@ class TestPoints(unittest.TestCase):
         points = self.model.get_ents(ENT_TYPE.POINT)
         self.assertEqual(list(points), ['pt0'])
 
-    # def test_point_to_posis(self):
-    #     points = self.model.get_ents(ENT_TYPE.POINT)
-    #     posis = self.model.get_ents(ENT_TYPE.POSI, points)
-    #     self.assertEqual(list(posis), ['ps0'])
+    def test_point_to_posis(self):
+        points = self.model.get_ents(ENT_TYPE.POINT)
+        posis = self.model.get_ents(ENT_TYPE.POSI, points)
+        self.assertEqual(list(posis), ['ps0'])
 
     # def test_point_to_verts(self):
     #     points = self.model.get_ents(ENT_TYPE.POINT)

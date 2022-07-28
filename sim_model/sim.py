@@ -88,7 +88,7 @@ _GR_ATTRIBS_NODE = {
     ENT_TYPE.COLL: '_atts_colls',
 }
 # --------------------------------------------------------------------------------------------------
-_GR_XYZ_NODE = '_att_psxyz';
+_GR_XYZ_NODE = '_att_ps_xyz';
 # --------------------------------------------------------------------------------------------------
 # types of edges in the graph
 class _GR_EDGE_TYPE(object):
@@ -298,7 +298,7 @@ class SIM(object):
         """
         posi = self._graph_add_ent(ENT_TYPE.POSI)
         if xyz is not None:
-            self.set_posi_coords(posi, "xyz", xyz)
+            self.set_posi_coords(posi, xyz)
         return posi
     # ----------------------------------------------------------------------------------------------
     def add_point(self, posi):
@@ -410,7 +410,7 @@ class SIM(object):
             self.graph.add_edge(last_edge, v_start, _GR_EDGE_TYPE.ENT)
             # re-order the predecessors of the start vertex
             # the order should be [last_edge, first_edge]
-            self.graph.setPredessors(v_start, [last_edge, edges[0]], _GR_EDGE_TYPE.ENT)
+            self.graph.set_predecessors(v_start, [last_edge, edges[0]], _GR_EDGE_TYPE.ENT)
     # ----------------------------------------------------------------------------------------------
     def triangulate_pgon(self, pgon):
         """Triangulate a polygon.
@@ -457,8 +457,8 @@ class SIM(object):
         :param ent: The ID of the entity to be added to the collection.
         :return: No value.
         """
-        ent_type = self.graph.get_node_prop(ent).get('ent_type')
-        if ent_type not in SIM._COLL_ENT_TYPES:
+        ent_type = self.graph.get_node_prop(ent, 'ent_type')
+        if ent_type not in _COLL_ENT_TYPES:
             raise Exception('Invalid entitiy for collections.')
         self.graph.add_edge(coll, ent, _GR_EDGE_TYPE.ENT)
     # ----------------------------------------------------------------------------------------------
@@ -487,7 +487,7 @@ class SIM(object):
         att = self._graph_attrib_node_name(ent_type, att_name)
         if not self.graph.has_node(att):
             self._graph_add_attrib(ent_type, att_name, att_data_type)
-        elif self.graph.get_node_prop(att).get('data_type') != att_data_type:
+        elif self.graph.get_node_prop(att, 'data_type') != att_data_type:
             raise Exception('Attribute already exists with different data type')
     # ----------------------------------------------------------------------------------------------
     def has_attrib(self, ent_type, att_name):
@@ -507,7 +507,7 @@ class SIM(object):
         :return: A list of attrib names.
         """
         return map(
-            lambda att: self.graph.get_node_prop(att).get('name'), 
+            lambda att: self.graph.get_node_prop(att, 'name'), 
             self.graph.successors(
                 _GR_ATTRIBS_NODE[ent_type],
                 _GR_EDGE_TYPE.META
@@ -560,10 +560,10 @@ class SIM(object):
         """
         ent_type = self.graph.get_node_prop(ent, 'ent_type')
         att = self._graph_attrib_node_name(ent_type, att_name)
-        att_vals = self.graph.successor(ent, att)
-        if att_vals == None:
+        succs = self.graph.successors(ent, att)
+        if len(succs) == 0:
             return None
-        return self.graph.get_node_prop(att_vals).get('value')
+        return self.graph.get_node_prop(succs[0], 'value')
     # ----------------------------------------------------------------------------------------------
     def del_attrib_val(self, ent, att_name):
         """Delete an attribute value from an entity in the model, specifying the attribute name.
@@ -575,10 +575,10 @@ class SIM(object):
         """
         ent_type = self.graph.get_node_prop(ent, 'ent_type')
         att = self._graph_attrib_node_name(ent_type, att_name)
-        att_vals = self.graph.successors(ent, att)
-        if len(att_vals) == 0:
+        succs = self.graph.successors(ent, att)
+        if len(succs) == 0:
             return
-        self.graph.del_edge(ent, att_vals[0], att)
+        self.graph.del_edge(ent, succs[0], att)
     # ----------------------------------------------------------------------------------------------
     def get_attrib_vals(self, ent_type, att_name):
         """Get a list of all the attribute values for the specified attribute.
@@ -591,7 +591,7 @@ class SIM(object):
         att_vals = self.graph.predecessors(att, _GR_EDGE_TYPE.ATT)
         values = []
         for att_val_n in att_vals:
-            values.append(self.graph.get_node_prop(att_val_n).get('value'))
+            values.append(self.graph.get_node_prop(att_val_n, 'value'))
         return values
     # ----------------------------------------------------------------------------------------------
     def get_attrib_datatype(self, ent_type, att_name):
@@ -602,7 +602,7 @@ class SIM(object):
         :return: The attribute value or None if no value.
         """
         att = self._graph_attrib_node_name(ent_type, att_name)
-        return self.graph.get_node_prop(att).get('data_type')
+        return self.graph.get_node_prop(att, 'data_type')
     # ----------------------------------------------------------------------------------------------
     def rename_attrib(self, ent_type, att_name, new_name):
         """Rename an attribute.
@@ -710,21 +710,21 @@ class SIM(object):
             for target_ent in self._nav(target_ent_type, source_ent):
                 ents_set[target_ent] = None # ordered set
         return list(ents_set.keys())
-
-
-
+    # ----------------------------------------------------------------------------------------------
     def _get_ent_seq(self, target_ent_type, source_ent_type):
-            if (target_ent_type == ENT_TYPE.POINT or source_ent_type == ENT_TYPE.POINT):
-                return SIM._ENT_SEQ_COLL_POINT_POSI
+            if (target_ent_type == ENT_TYPE.TRI or source_ent_type == ENT_TYPE.TRI):
+                return _ENT_SEQ_CO_PG_TRI_PO
+            elif (target_ent_type == ENT_TYPE.POINT or source_ent_type == ENT_TYPE.POINT):
+                return _ENT_SEQ_CO_PT_PO
             elif (target_ent_type == ENT_TYPE.PLINE or source_ent_type == ENT_TYPE.PLINE):
-                return SIM._ENT_SEQ_COLL_PLINE_POSI
+                return _ENT_SEQ_CO_PL_PO
             elif (target_ent_type == ENT_TYPE.PGON or source_ent_type == ENT_TYPE.PGON):
-                return SIM._ENT_SEQ_COLL_PGON_POSI
-            return SIM._ENT_SEQ
+                return _ENT_SEQ_CO_PG_PO
+            return _ENT_SEQ
     # ----------------------------------------------------------------------------------------------
     # TODO more tests needed
     def _nav(self, target_ent_type, source_ent):
-        source_ent_type = self.graph.get_node_prop(source_ent).get('ent_type')
+        source_ent_type = self.graph.get_node_prop(source_ent, 'ent_type')
         ent_seq = self._get_ent_seq(target_ent_type, source_ent_type)
         if source_ent_type == target_ent_type:
             if source_ent_type == ENT_TYPE.COLL:
@@ -743,7 +743,7 @@ class SIM(object):
             ent_set = OrderedDict() # to be used as an ordered set
             for ent in ents:
                 for target_ent in navigate(ent, _GR_EDGE_TYPE.ENT):
-                    this_ent_type = self.graph.get_node_prop(target_ent).get('ent_type')
+                    this_ent_type = self.graph.get_node_prop(target_ent, 'ent_type')
                     if this_ent_type == target_ent_type:
                         target_ents_set[target_ent] = None # add to orderd set
                     elif this_ent_type in ent_seq:
@@ -768,7 +768,7 @@ class SIM(object):
         :param point: An entity ID from which to get the position.
         :return: A list of position IDs. 
         """
-        ent_type = self.graph.get_node_prop(ent).get('ent_type')
+        ent_type = self.graph.get_node_prop(ent, 'ent_type')
         if ent_type == ENT_TYPE.POSI:
             return ent
         elif ent_type == ENT_TYPE.VERT:
@@ -815,8 +815,8 @@ class SIM(object):
         :return: A list of three numbers, the XYZ coordinates.
         """
         posi = self.graph.successors(vert, _GR_EDGE_TYPE.ENT)[0]
-        att_vals_n = self.graph.successor(posi, _GR_XYZ_NODE)
-        return self.graph.get_node_prop(att_vals_n).get('value')
+        att_val_n = self.graph.successors(posi, _GR_XYZ_NODE)[0]
+        return self.graph.get_node_prop(att_val_n, 'value')
     # ----------------------------------------------------------------------------------------------
     def get_posi_coords(self, posi):
         """Get the XYZ coordinates of a position.
@@ -824,8 +824,8 @@ class SIM(object):
         :param posi: A position ID.
         :return: A list of three numbers, the XYZ coordinates.
         """
-        att_vals_n = self.graph.successor(posi, _GR_XYZ_NODE)
-        return self.graph.get_node_prop(att_vals_n).get('value')
+        att_val_n = self.graph.successors(posi, _GR_XYZ_NODE)[0]
+        return self.graph.get_node_prop(att_val_n, 'value')
 # ----------------------------------------------------------------------------------------------
     def set_posi_coords(self, posi, xyz):
         """Set the XYZ coordinates of a position.
@@ -834,7 +834,7 @@ class SIM(object):
         :return: The ID of the attrib value node.
         """
         # get the name of the attribute value node
-        att_val_node = self._graph_attrib_valNode_name(xyz)
+        att_val_node = self._graph_attrib_val_node_name(xyz, _GR_XYZ_NODE)
         # make sure that no node with the name already exists
         if (not self.graph.has_node(att_val_node)) :
             # add the attrib value node
@@ -901,7 +901,7 @@ class SIM(object):
             set_all = set(self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META))
             return list(set_all - set_equal)
         # other cases, data_type must be a number
-        data_type = self.graph.get_node_prop(att).get('data_type')
+        data_type = self.graph.get_node_prop(att, 'data_type')
         if data_type != DATA_TYPE.NUM:
             raise Exception("The '" + comparator +
                 "' comparator cannot be used with attributes of type '" + data_type + "'.")
@@ -910,29 +910,29 @@ class SIM(object):
         if comparator == '<':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                val_n = self.graph.successor(ent, att)
-                if val_n != None and self.graph.get_node_prop(val_n).get('value') < att_val:
+                succs = self.graph.successors(ent, att)
+                if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') < att_val:
                     result.append(ent)
         # val <= att_val
         if comparator == '<=':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                val_n = self.graph.successor(ent, att)
-                if val_n != None and self.graph.get_node_prop(val_n).get('value') <= att_val:
+                succs = self.graph.successors(ent, att)
+                if len(succs) != 0 and self.graph.get_node_prop(succs[0],'value') <= att_val:
                     result.append(ent)
         # val > att_val
         if comparator == '>':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                val_n = self.graph.successor(ent, att)
-                if val_n != None and self.graph.get_node_prop(val_n).get('value') > att_val:
+                succs = self.graph.successors(ent, att)
+                if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') > att_val:
                     result.append(ent)
         # val >= att_val
         if comparator == '>=':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                val_n = self.graph.successor(ent, att)
-                if val_n != None and self.graph.get_node_prop(val_n).get('value') >= att_val:
+                succs = self.graph.successors(ent, att)
+                if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') >= att_val:
                     result.append(ent)
         # return list of entities
         # TODO handle queries sub-entities in lists and dicts
@@ -952,8 +952,7 @@ class SIM(object):
         """Create the name for an attrib value node.
         It will be something like this: '_val_[1,2,3]'.
         """
-        # TODO create a dict for fast lookup
-        data_type = self.graph.get_node_prop(att).get('data_type')
+        data_type = self.graph.get_node_prop(att, 'data_type')
         if data_type == DATA_TYPE.NUM or data_type == DATA_TYPE.STR:
             return att_val
         return str(att_val)
@@ -1033,6 +1032,14 @@ class SIM(object):
         if val_type == dict:
             return DATA_TYPE.DICT
         raise Exception('Data type is not recognised:', str(value), type(value))
+    # ----------------------------------------------------------------------------------------------
+    def to_string(self):
+        """
+        Creates a human-readable string representation of the graph, for debugging.
+
+        :return: A string representation of the graph.
+        """
+        return self.graph.to_string()
 
 # ==================================================================================================
 # END SIM CLASS

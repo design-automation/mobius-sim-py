@@ -40,7 +40,7 @@ class TestGraph(unittest.TestCase):
         self.graph.add_edge_type('et2', False)
         self.assertFalse(self.graph.has_edge_type('et3'))
 
-    def test_add_edge(self):
+    def test_add_del_edge(self):
         self.graph.add_edge_type('et1', True)
         self.assertTrue(self.graph.has_edge_type('et1'))
         self.assertFalse(self.graph.has_edge_type('et2'))
@@ -49,6 +49,34 @@ class TestGraph(unittest.TestCase):
         self.graph.add_node('ccc')
         self.graph.add_edge('aaa', 'bbb', 'et1')
         self.assertTrue(self.graph.has_edge('aaa', 'bbb', 'et1'))
+        self.assertFalse(self.graph.has_edge('aaa', 'ccc', 'et1'))
+        self.graph.del_edge('aaa', 'bbb', 'et1')
+        self.assertFalse(self.graph.has_edge('aaa', 'bbb', 'et1'))
+
+    def test_del_multi_edges1(self):
+        self.graph.add_edge_type('et1', True)
+        self.assertTrue(self.graph.has_edge_type('et1'))
+        self.assertFalse(self.graph.has_edge_type('et2'))
+        self.graph.add_node('aaa')
+        self.graph.add_node('bbb')
+        self.graph.add_node('ccc')
+        self.graph.add_edge('aaa', 'bbb', 'et1')
+        self.graph.add_edge('aaa', 'ccc', 'et1')
+        self.graph.del_edge('aaa', None, 'et1')
+        self.assertFalse(self.graph.has_edge('aaa', 'bbb', 'et1'))
+        self.assertFalse(self.graph.has_edge('aaa', 'ccc', 'et1'))
+
+    def test_del_multi_edges2(self):
+        self.graph.add_edge_type('et1', True)
+        self.assertTrue(self.graph.has_edge_type('et1'))
+        self.assertFalse(self.graph.has_edge_type('et2'))
+        self.graph.add_node('aaa')
+        self.graph.add_node('bbb')
+        self.graph.add_node('ccc')
+        self.graph.add_edge('aaa', 'ccc', 'et1')
+        self.graph.add_edge('bbb', 'ccc', 'et1')
+        self.graph.del_edge(None, 'ccc', 'et1')
+        self.assertFalse(self.graph.has_edge('aaa', 'bbb', 'et1'))
         self.assertFalse(self.graph.has_edge('aaa', 'ccc', 'et1'))
 
     def test_add_bad_edge(self):
@@ -119,6 +147,28 @@ class TestGraph(unittest.TestCase):
         self.graph.clear_snapshot(old_ssid)
         self.assertFalse(self.graph.has_edge('aaa', 'bbb', 'et1'))
         self.assertFalse(self.graph.has_edge('bbb', 'ccc', 'et2'))
+
+    def test_set_successors(self):
+        self.graph.add_node('aaa')
+        self.graph.add_node('bbb')
+        self.graph.add_node('ccc')
+        self.graph.add_edge_type('et1', True)
+        self.graph.add_edge('aaa', 'bbb', 'et1')
+        self.graph.add_edge('aaa', 'ccc', 'et1')
+        self.assertListEqual(self.graph.successors('aaa', 'et1'), ['bbb', 'ccc'])
+        self.graph.set_successors('aaa', ['ccc', 'bbb'], 'et1')
+        self.assertListEqual(self.graph.successors('aaa', 'et1'), ['ccc', 'bbb'])
+
+    def test_set_predecessors(self):
+        self.graph.add_node('aaa')
+        self.graph.add_node('bbb')
+        self.graph.add_node('ccc')
+        self.graph.add_edge_type('et1', True)
+        self.graph.add_edge('aaa', 'ccc', 'et1')
+        self.graph.add_edge('bbb', 'ccc', 'et1')
+        self.assertListEqual(self.graph.predecessors('ccc', 'et1'), ['aaa', 'bbb'])
+        self.graph.set_predecessors('ccc', ['bbb', 'aaa'], 'et1')
+        self.assertListEqual(self.graph.predecessors('ccc', 'et1'), ['bbb', 'aaa'])
 
 if __name__ == '__main__':
     unittest.main()
