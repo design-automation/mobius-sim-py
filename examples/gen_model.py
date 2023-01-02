@@ -1,6 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 from sim_model import sim
+from sim_model import io_sim
 ENT_TYPE = sim.ENT_TYPE
 DATA_TYPE = sim.DATA_TYPE
 
@@ -52,7 +53,4 @@ val7 = sm.get_ents(ENT_TYPE.COLL, posi)
 # ptint attrib vals
 print("Attrib values:", val1, val2, val3, val4, val5, val6, val7)
 
-# print info about the graph
-print(sm.info())
-
-sm.export_sim_file("test.sim")
+io_sim.export_sim_file(sm, "test.sim")

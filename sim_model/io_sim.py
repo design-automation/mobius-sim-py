@@ -125,7 +125,7 @@ def export_sim_file(sim_model, filepath):
     :return: No value.
     """
     with open(filepath, 'w') as f:
-        f.write( json.dumps(sim_model.export_sim_data()) )
+        f.write( json.dumps(export_sim_data(sim_model)) )
 # ==================================================================================================
 # IMPORT
 # ==================================================================================================
