@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 import unittest
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
@@ -27,35 +27,36 @@ class TestPoints(unittest.TestCase):
         posis = self.model.get_ents(ENT_TYPE.POSI, points)
         self.assertEqual(list(posis), ['ps0'])
 
-    # def test_point_to_verts(self):
-    #     points = self.model.get_ents(ENT_TYPE.POINT)
-    #     verts = self.model.get_ents(ENT_TYPE.VERT, points)
-    #     self.assertEqual(list(verts), ['_v0'])
+    def test_point_to_verts(self):
+        points = self.model.get_ents(ENT_TYPE.POINT)
+        verts = self.model.get_ents(ENT_TYPE.VERT, points)
+        self.assertEqual(list(verts), ['_v0'])
 
-    # def test_point_to_colls(self):
-    #     points = self.model.get_ents(ENT_TYPE.POINT)
-    #     colls = self.model.get_ents(ENT_TYPE.COLL, points)
-    #     self.assertEqual(list(colls), ['co0'])
+    def test_point_to_colls(self):
+        points = self.model.get_ents(ENT_TYPE.POINT)
+        colls = self.model.get_ents(ENT_TYPE.COLL, points)
+        self.assertEqual(list(colls), ['co0'])
 
-    # def test_posi_to_point(self):
-    #     posis = self.model.get_ents(ENT_TYPE.POSI)
-    #     point = self.model.get_ents(ENT_TYPE.POINT, posis[0])
-    #     self.assertEqual(list(point), ['pt0'])
+    def test_posi_to_point(self):
+        posis = self.model.get_ents(ENT_TYPE.POSI)
+        point = self.model.get_ents(ENT_TYPE.POINT, posis[0])
+        self.assertEqual(list(point), ['pt0'])
 
-    # def test_vert_to_point(self):
-    #     verts = self.model.get_ents(ENT_TYPE.VERT)
-    #     point = self.model.get_ents(ENT_TYPE.POINT, verts[0])
-    #     self.assertEqual(list(point), ['pt0'])
+    def test_vert_to_point(self):
+        verts = self.model.get_ents(ENT_TYPE.VERT)
+        point = self.model.get_ents(ENT_TYPE.POINT, verts[0])
+        self.assertEqual(list(point), ['pt0'])
 
-    # def test_get_point_xyz(self):
-    #     points = self.model.get_ents(ENT_TYPE.POINT)
-    #     verts = self.model.get_ents(ENT_TYPE.VERT, points[0])
-    #     vert_xyz = self.model.get_ent_coords(verts[0])
-    #     self.assertEqual(list(vert_xyz), [1,2,3])
-    #     point = self.model.get_ents(ENT_TYPE.POINT, verts[0])
-    #     posis = self.model.get_ents(ENT_TYPE.POSI, points[0])
-    #     posi_xyz = self.model.get_ent_coords(posis[0])
-    #     self.assertEqual(list(posi_xyz), [1,2,3])
+    def test_get_point_xyz(self):
+        points = self.model.get_ents(ENT_TYPE.POINT)
+        posis = self.model.get_ents(ENT_TYPE.POSI, points[0])
+        vert_xyz = self.model.get_attrib_val(posis[0], 'xyz')
+        self.assertEqual(list(vert_xyz), [1,2,3])
+        point = self.model.get_ents(ENT_TYPE.POINT, posis[0])
+        verts = self.model.get_ents(ENT_TYPE.VERT, point)
+        posis = self.model.get_ents(ENT_TYPE.POSI, verts[0])
+        posi_xyz = self.model.get_attrib_val(posis[0], 'xyz')
+        self.assertEqual(list(posi_xyz), [1,2,3])
 
 if __name__ == '__main__':
     unittest.main()

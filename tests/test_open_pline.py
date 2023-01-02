@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 import unittest
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
@@ -9,7 +9,7 @@ from sim_model import sim
 ENT_TYPE = sim.ENT_TYPE
 DATA_TYPE = sim.DATA_TYPE
 
-class TestClosedPolylines(unittest.TestCase):
+class TestOpenPolylines(unittest.TestCase):
 
     def setUp(self):
         m = sim.SIM()

@@ -1,8 +1,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import unicode_literals
 from __future__ import with_statement
+# from __future__ import unicode_literals
 # generators, generator_stop, nested_scopes 
 import sys
 print("PYTHON Version: ", sys.version_info)
@@ -146,9 +146,12 @@ def import_sim_data(sim_model, json_data):
         closed = posis_i[0] == posis_i[-1]
         sim_model.add_pline(map(lambda posi_i: posis[posi_i], posis_i), closed)
     # polygons
-    for posis_i in json_data['geometry']['pgons']:
-        sim_model.add_pgon(map(lambda posi_i: posis[posi_i], posis_i[0]))
-        # TODO add holes
+    for posi_lists_i in json_data['geometry']['pgons']:
+        boundary = map(lambda posi_i: posis[posi_i], posi_lists_i[0])
+        pgon = sim_model.add_pgon(boundary)
+        for hole_posis_i in posi_lists_i[1:]:
+            sim_model.add_pgon_hole(pgon, map(lambda posi_i: posis[posi_i], hole_posis_i))
+
     # collections
     num_colls = len(json_data['geometry']['coll_points'])
     for i in range(num_colls):
@@ -162,18 +165,19 @@ def import_sim_data(sim_model, json_data):
         for child_coll_i in json_data['geometry']['coll_colls'][i]:
             sim_model.add_coll_ent(coll, 'co' + str(child_coll_i))
     # entity attribs
-    ent_types_prefix = [
-        [ENT_TYPE.POSI, 'ps'],
-        [ENT_TYPE.VERT, '_v'],
-        [ENT_TYPE.EDGE, '_e'],
-        [ENT_TYPE.WIRE, '_w'],
-        [ENT_TYPE.POINT, 'pt'],
-        [ENT_TYPE.PLINE, 'pl'],
-        [ENT_TYPE.PGON, 'pg'],
-        [ENT_TYPE.COLL, 'co']
+    ent_type_strs = [
+        ['posis', ENT_TYPE.POSI],
+        ['verts', ENT_TYPE.VERT],
+        ['edges', ENT_TYPE.EDGE],
+        ['wires', ENT_TYPE.WIRE],
+        ['points', ENT_TYPE.POINT],
+        ['plines', ENT_TYPE.PLINE],
+        ['pgons', ENT_TYPE.PGON],
+        ['colls', ENT_TYPE.COLL]
     ]
-    for ent_type, ent_prefix in ent_types_prefix:
-        for attrib in json_data['attributes'][ent_type]:
+    
+    for sim_ent_type, ent_type in ent_type_strs:
+        for attrib in json_data['attributes'][sim_ent_type]:
             att_name = attrib['name']
             if sim_model.has_attrib(ent_type, att_name): 
                 if (attrib['data_type'] != sim_model.get_attrib_datatype(ent_type, att_name)):
@@ -184,7 +188,7 @@ def import_sim_data(sim_model, json_data):
             for i in range(len(attrib['values'])):
                 att_value = attrib['values'][i]
                 for ent_i in attrib['entities'][i]:
-                    ent = ent_prefix + str(ent_i)
+                    ent = ent_type + str(ent_i)
                     sim_model.set_attrib_val(ent, att_name, att_value)
     # model attributes
     for [attrib_name, attrib_val] in json_data['attributes']['model']:

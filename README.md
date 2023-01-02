@@ -4,7 +4,7 @@ Python library for reading and writing Mobius SIM files
 # Python version
 This library is compatible with:
 - Python 2.x 
-- Python 3.x
+- Python 3.x (CURRENTLY BROKEN)
 - IronPython.
 
 # Documentation
@@ -17,4 +17,4 @@ To generate the documentation:
 # Unit Tests
 
 To run tests:
-- Execute `.\run_tests.bat` in teh root folder.
+- Execute `.\run_tests.bat` in the root folder.

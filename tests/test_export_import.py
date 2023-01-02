@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 import unittest
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
@@ -47,6 +47,15 @@ class TestImport(unittest.TestCase):
         # check 
         pgons = self.model.get_ents(ENT_TYPE.PGON)
         self.assertEqual(len(pgons), 18)
+
+    def test_import_file_with_hole(self):
+        # import a file
+        io_sim.import_sim_file(self.model, './pgon_hole.sim')
+        # check 
+        pgons = self.model.get_ents(ENT_TYPE.PGON)
+        self.assertEqual(len(pgons), 1)
+        wires = self.model.get_ents(ENT_TYPE.WIRE, pgons)
+        self.assertEqual(len(wires), 2)
 
     def test_export_import_sim_data(self):
         # make some geom

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 import unittest
 import sys, os
 sys.path.insert(0, os.path.abspath('..'))
@@ -27,7 +27,7 @@ class TestGraph(unittest.TestCase):
         self.graph.set_node_prop('aaa', 'k3', {'one': 1, 'tow': 2, 'three': 3})
         self.graph.set_node_prop('aaa', 'k4', 'str123')
         self.graph.set_node_prop('aaa', 'k5', False)
-        self.assertListEqual(self.graph.get_node_prop_names('aaa'), ['k1', 'k2', 'k3', 'k4', 'k5'])
+        self.assertListEqual(sorted(self.graph.get_node_prop_names('aaa')), ['k1', 'k2', 'k3', 'k4', 'k5'])
         self.assertEqual(self.graph.get_node_prop('aaa', 'k1'), 123)
         self.assertListEqual(self.graph.get_node_prop('aaa', 'k2'), [1,2,3])
         self.assertDictEqual(self.graph.get_node_prop('aaa', 'k3'), {'one': 1, 'tow': 2, 'three': 3})

@@ -1,8 +1,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import unicode_literals
 from __future__ import with_statement
+# from __future__ import unicode_literals
 # generators, generator_stop, nested_scopes 
 import sys
 print("PYTHON Version: ", sys.version_info)
@@ -100,46 +100,48 @@ class _GR_EDGE_TYPE(object):
 # ENT SEQUENCES
 # ==================================================================================================
 _ENT_SEQ = {
-    ENT_TYPE.POSI:  {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.VERT:  {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.EDGE:  {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.WIRE:  {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.POINT: {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.PLINE: {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.PGON:  {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.COLL:  {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
+    ENT_TYPE.POSI:  0, # {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.VERT:  1, # {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.EDGE:  2, # {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.WIRE:  3, # {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.POINT: 4, # {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.PLINE: 4, # {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.PGON:  4, # {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.COLL:  6, # {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
 }
 # --------------------------------------------------------------------------------------------------
 _ENT_SEQ_CO_PT_PO = {
-    ENT_TYPE.POSI:  {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.POINT: {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.COLL:  {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
+    ENT_TYPE.POSI:  0, # {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.VERT:  1, # {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, #  TODO remove
+    ENT_TYPE.POINT: 2, # {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.COLL:  6, # {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
 }
 # --------------------------------------------------------------------------------------------------
 _ENT_SEQ_CO_PL_PO = {
-    ENT_TYPE.POSI:  {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
-    ENT_TYPE.VERT:  {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
-    ENT_TYPE.EDGE:  {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
-    ENT_TYPE.PLINE: {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
-    ENT_TYPE.COLL:  {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
+    ENT_TYPE.POSI:  0, # {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
+    ENT_TYPE.VERT:  1, # {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
+    ENT_TYPE.EDGE:  2, # {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
+    ENT_TYPE.WIRE:  3, # {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.PLINE: 4, # {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}, 
+    ENT_TYPE.COLL:  6, # {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
 }
 # --------------------------------------------------------------------------------------------------
 _ENT_SEQ_CO_PG_PO = {
-    ENT_TYPE.POSI: {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.VERT: {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.EDGE: {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.WIRE: {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.PGON: {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.COLL: {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
+    ENT_TYPE.POSI: 0, # {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.VERT: 1, # {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.EDGE: 2, # {'idx': 2, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.WIRE: 3, # {'idx': 3, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.PGON: 4, # {'idx': 4, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+    ENT_TYPE.COLL: 6, # {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
 }
 # --------------------------------------------------------------------------------------------------
-_ENT_SEQ_CO_PG_TRI_PO = {
-    ENT_TYPE.POSI: {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.VERT: {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.TRI},
-    ENT_TYPE.TRI:  {'idx': 2, 'succ': _GR_EDGE_TYPE.TRI,    'pred': _GR_EDGE_TYPE.TRI},
-    ENT_TYPE.PGON: {'idx': 3, 'succ': _GR_EDGE_TYPE.TRI,    'pred': _GR_EDGE_TYPE.ENT},
-    ENT_TYPE.COLL: {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
-}
+# _ENT_SEQ_CO_PG_TRI_PO = {
+#     ENT_TYPE.POSI: {'idx': 0, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT},
+#     ENT_TYPE.VERT: {'idx': 1, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.TRI},
+#     ENT_TYPE.TRI:  {'idx': 2, 'succ': _GR_EDGE_TYPE.TRI,    'pred': _GR_EDGE_TYPE.TRI},
+#     ENT_TYPE.PGON: {'idx': 3, 'succ': _GR_EDGE_TYPE.TRI,    'pred': _GR_EDGE_TYPE.ENT},
+#     ENT_TYPE.COLL: {'idx': 6, 'succ': _GR_EDGE_TYPE.ENT, 'pred': _GR_EDGE_TYPE.ENT}
+# }
 # ==================================================================================================
 # ENT SETS
 # ==================================================================================================
@@ -199,33 +201,39 @@ class SIM(object):
       polygon boundary. Subsequent wires spcify the polygon holes.
     """
     """
+    === NODES ===
+
     The nodes for entities are:
     
-    - ent nodes
+    - entity nodes
       - e.g. 'ps01', '_v123'
+      - have a property, 'ent_type', e.g. 'ps', '_v'
+      - vertices have an additional property, 'vert_type', can be 'pl', 'pg', 'pgh'
 
-    - ent_type nodes 
-      - e.g. 'posis', 'verts'
+    - entity type nodes 
+      - e.g. '_ents_posis', '_ents_verts'
 
     The nodes for attribs are:
 
-    - _atts_ent_type nodes 
+    - attribute entity type nodes 
       - e.g.'_atts_pgons'
 
-    - _att_ent_type_name nodes 
-      - e.g. '_att_pgons_area'
+    - attribute name nodes 
+      - e.g. '_att_pgons_area' (i.e. the attribute name is 'area')
 
     - _att_val nodes 
       - e.g. '[1,2,3]'
-
-    The forward edges are as follows:
     
+    === EDGES ===
+
     Edges of type 'entity':
 
     - ent -> sub_ents 
-      - e.g. pg0 -> [w0, w1]
+      - e.g. pg0 -> [_w0, _w1]
       - edge_type = 'entity'
       - many to many
+
+    For each 'entity' forward edge, there is an equivalent reverse edge.
 
     Edges of type 'meta':
 
@@ -235,27 +243,34 @@ class SIM(object):
       - one to many
 
     - ent_type_attribs -> att_ent_type_name 
-      - e.g. pgons_attribs -> att_pgons_area) 
+      - e.g. pgons_attribs -> att_pgons_area
       - edge_type = 'meta'
       - one to many
 
-    Edges of type 'att':
+    For 'meta' forward edges, there is __no__ reverse edge.
+
+    Edges of type 'attrib':
 
     - attrib_val -> att_ent_type_name 
       - e.g. val_123 -> att_pgons_area
       - edge_type = 'attrib' 
       - many to one
 
-    Edges of with a type specific to the attribute:
+    For each 'attrib' forward edge, there is an equivalent reverse edge.
+
+    Edges with a type specific to the attribute:
 
     - ent -> attrib_val 
       - pg0 -> val_123
       - edge_type = att_ent_type_name e.g. '_att_pgons_area'
       - many to one
 
-    For each forward edge, there is an equivalent reverse edge.
+    For each attribute specific forward edge, there is an equivalent reverse edge.
 
     """
+
+    # Triangulation is not yet implemented.
+
     # ==============================================================================================
     # CONSTRUCTOR FOR SIM CLASS
     # ==============================================================================================
@@ -276,7 +291,7 @@ class SIM(object):
                 ENT_TYPE.POINT, ENT_TYPE.PLINE, ENT_TYPE.PGON, ENT_TYPE.COLL]:
             self.graph.add_node( _GR_ENTS_NODE[ent_type] )
 
-        # create nodes for attribs (not TRI)
+        # create nodes for attribs (not incl TRI)
         for ent_type in [ENT_TYPE.POSI, ENT_TYPE.VERT, ENT_TYPE.EDGE, ENT_TYPE.WIRE, 
                 ENT_TYPE.POINT, ENT_TYPE.PLINE, ENT_TYPE.PGON, ENT_TYPE.COLL]:
             self.graph.add_node( _GR_ATTRIBS_NODE[ent_type] )
@@ -323,11 +338,14 @@ class SIM(object):
         """
         if len(posis) < 2:
             raise Exception('Too few positions for polyline.');
-        # pline
+        # TODO removed wire
+        # pline and wire
         pline = self._graph_add_ent(ENT_TYPE.PLINE)
-        closed = posis[0] == posis[-1]
-        self._add_edge_seq(posis, len(posis) - 1, closed, VERT_TYPE.PLINE, pline)
-        # return entity
+        wire = self._graph_add_ent(ENT_TYPE.WIRE)
+        self.graph.add_edge(pline, wire, _GR_EDGE_TYPE.ENT)
+        # verts and edges
+        self._add_edge_seq(posis, closed, VERT_TYPE.PLINE, wire)
+        # return
         return pline
     # ----------------------------------------------------------------------------------------------
     def add_pgon(self, posis):
@@ -344,7 +362,7 @@ class SIM(object):
         wire = self._graph_add_ent(ENT_TYPE.WIRE)
         self.graph.add_edge(pgon, wire, _GR_EDGE_TYPE.ENT)
         # verts and edges
-        self._add_edge_seq(posis[0], len(posis[0]), True, VERT_TYPE.PGON, wire)
+        self._add_edge_seq(posis[0], True, VERT_TYPE.PGON, wire)
         # make holes
         for i in range(1, len(posis)):
             self.add_pgon_hole(pgon, posis[i])
@@ -366,22 +384,20 @@ class SIM(object):
         wire = self._graph_add_ent(ENT_TYPE.WIRE)
         self.graph.add_edge(pgon, wire, _GR_EDGE_TYPE.ENT)
         # verts and edges
-        self._add_edge_seq(posis, len(posis), True, VERT_TYPE.PGON_HOLE, wire)
+        self._add_edge_seq(posis, True, VERT_TYPE.PGON_HOLE, wire)
         # triangulate
         # self.tri.triangulatePgon(pgon) TODO
         # return
         return wire
     # ----------------------------------------------------------------------------------------------
-    def _add_edge_seq(self, posis, num_edges, closed, vert_type, parent):
-        """Add a sequnce of edges. Use by addPgon(), add_pgon_hole(), addPline().
+    def _add_edge_seq(self, posis, closed, vert_type, parent):
+        """Add a sequnce of edges. Use by add_pgon(), add_pgon_hole(), add_pline().
 
         :param posis: The list of posis.
-        :param num_edges: The number of edges to add.
-        :param closed: If true, and additional edge is added to close the loop.
+        :param closed: If true, then the last edge loops back to the first vertex.
         :param vert_type: The vertex type, see VERT_TYPE
         :param parent: The parent of the new edges. Wither a wire or a pline.
         """
-        num_verts = num_edges if closed else num_edges + 1
         edges = []
         v0 = None
         v1 = None
@@ -390,7 +406,7 @@ class SIM(object):
         self.graph.set_node_prop(v_start, 'vert_type', vert_type)
         self.graph.add_edge(v_start, posis[0], _GR_EDGE_TYPE.ENT)
         v0 = v_start
-        for i in range(1, len(num_verts)):
+        for i in range(1, len(posis)):
             # v1
             v1 = self._graph_add_ent(ENT_TYPE.VERT)
             self.graph.set_node_prop(v1, 'vert_type', vert_type)
@@ -401,7 +417,7 @@ class SIM(object):
             self.graph.add_edge(edge, v0, _GR_EDGE_TYPE.ENT)
             self.graph.add_edge(edge, v1, _GR_EDGE_TYPE.ENT)
             v0 = v1
-            edges.push(edge)
+            edges.append(edge)
         # last edge
         if closed:
             last_edge = self._graph_add_ent(ENT_TYPE.EDGE)
@@ -528,27 +544,27 @@ class SIM(object):
         :return: No value.
         """
         ent_type = self.graph.get_node_prop(ent, 'ent_type')
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        if ent_type != self.graph.get_node_prop(att, 'ent_type'):
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        if ent_type != self.graph.get_node_prop(att_node, 'ent_type'):
             raise Exception('Entity and attribute have different types.')
         data_type = self._check_type(att_value)
-        if self.graph.get_node_prop(att, 'data_type') != data_type:
+        if self.graph.get_node_prop(att_node, 'data_type') != data_type:
             raise Exception('Attribute value has the wrong data type: ' + str(att_value) +
                 'The data type is a "' + data_type + '". ' + 
-                'The data type should be a "' + self.graph.get_node_prop(att, 'data_type') + '".' )
+                'The data type should be a "' + self.graph.get_node_prop(att_node, 'data_type') + '".' )
         # get the name of the attribute value node
-        att_val_node = self._graph_attrib_val_node_name(att_value)
-        # make sure that no node with the name already exists
+        att_val_node = self._graph_attrib_val_node_name(att_value, att_node)
+        # make the att_val_node exists
         if not self.graph.has_node(att_val_node):
-            # add the attrib value node
+            # add the att_val_node
             self.graph.add_node(att_val_node)
             self.graph.set_node_prop(att_val_node, 'value', att_value)
         # add an edge from the att_val_node to the attrib: att_val -> att
-        self.graph.add_edge(att_val_node, att, _GR_EDGE_TYPE.ATT)
+        self.graph.add_edge(att_val_node, att_node, _GR_EDGE_TYPE.ATT)
         # add and edge from the ent to the att_val_node
-        self.graph.del_edge(ent, None, att)
+        self.graph.del_edge(ent, None, att_node)
         # ent -> att_val, ent <- att_val
-        self.graph.add_edge(ent, att_val_node, att)
+        self.graph.add_edge(ent, att_val_node, att_node)
     # ----------------------------------------------------------------------------------------------
     def get_attrib_val(self, ent, att_name):
         """Get an attribute value from an entity in the model, specifying the attribute name.
@@ -559,8 +575,8 @@ class SIM(object):
         :return: The attribute value or None if no value.
         """
         ent_type = self.graph.get_node_prop(ent, 'ent_type')
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        succs = self.graph.successors(ent, att)
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        succs = self.graph.successors(ent, att_node)
         if len(succs) == 0:
             return None
         return self.graph.get_node_prop(succs[0], 'value')
@@ -574,11 +590,11 @@ class SIM(object):
         :return: No value.
         """
         ent_type = self.graph.get_node_prop(ent, 'ent_type')
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        succs = self.graph.successors(ent, att)
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        succs = self.graph.successors(ent, att_node)
         if len(succs) == 0:
             return
-        self.graph.del_edge(ent, succs[0], att)
+        self.graph.del_edge(ent, succs[0], att_node)
     # ----------------------------------------------------------------------------------------------
     def get_attrib_vals(self, ent_type, att_name):
         """Get a list of all the attribute values for the specified attribute.
@@ -587,11 +603,11 @@ class SIM(object):
         :param att_name: The name of the attribute.
         :return: A list of all attribute values.
         """
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        att_vals = self.graph.predecessors(att, _GR_EDGE_TYPE.ATT)
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        att_val_nodes = self.graph.predecessors(att_node, _GR_EDGE_TYPE.ATT)
         values = []
-        for att_val_n in att_vals:
-            values.append(self.graph.get_node_prop(att_val_n, 'value'))
+        for att_val_node in att_val_nodes:
+            values.append(self.graph.get_node_prop(att_val_node, 'value'))
         return values
     # ----------------------------------------------------------------------------------------------
     def get_attrib_datatype(self, ent_type, att_name):
@@ -601,8 +617,8 @@ class SIM(object):
         :param att_name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        return self.graph.get_node_prop(att, 'data_type')
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        return self.graph.get_node_prop(att_node, 'data_type')
     # ----------------------------------------------------------------------------------------------
     def rename_attrib(self, ent_type, att_name, new_name):
         """Rename an attribute.
@@ -611,12 +627,12 @@ class SIM(object):
         :param att_name: The name of the attribute.
         :return: The attribute value or None if no value.
         """
-        old_att = self._graph_attrib_node_name(ent_type, att_name)
-        att_data_type = self.graph.get_node_prop(old_att, 'data_type')
-        new_att = self._graph_add_attrib(ent_type, new_name, att_data_type)
-        for pred in self.graph.predecessors(old_att, _GR_EDGE_TYPE.ATT):
-            self.graph.del_edge(pred, old_att, _GR_EDGE_TYPE.ATT)
-            self.graph.add_edge(pred, new_att, _GR_EDGE_TYPE.ATT)
+        old_att_node = self._graph_attrib_node_name(ent_type, att_name)
+        att_data_type = self.graph.get_node_prop(old_att_node, 'data_type')
+        new_att_node = self._graph_add_attrib(ent_type, new_name, att_data_type)
+        for pred in self.graph.predecessors(old_att_node, _GR_EDGE_TYPE.ATT):
+            self.graph.del_edge(pred, old_att_node, _GR_EDGE_TYPE.ATT)
+            self.graph.add_edge(pred, new_att_node, _GR_EDGE_TYPE.ATT)
     # ==============================================================================================
     # MODEL ATTRIBUTES
     # ==============================================================================================
@@ -712,9 +728,9 @@ class SIM(object):
         return list(ents_set.keys())
     # ----------------------------------------------------------------------------------------------
     def _get_ent_seq(self, target_ent_type, source_ent_type):
-            if (target_ent_type == ENT_TYPE.TRI or source_ent_type == ENT_TYPE.TRI):
-                return _ENT_SEQ_CO_PG_TRI_PO
-            elif (target_ent_type == ENT_TYPE.POINT or source_ent_type == ENT_TYPE.POINT):
+            # if (target_ent_type == ENT_TYPE.TRI or source_ent_type == ENT_TYPE.TRI):
+            #     return _ENT_SEQ_CO_PG_TRI_PO
+            if (target_ent_type == ENT_TYPE.POINT or source_ent_type == ENT_TYPE.POINT):
                 return _ENT_SEQ_CO_PT_PO
             elif (target_ent_type == ENT_TYPE.PLINE or source_ent_type == ENT_TYPE.PLINE):
                 return _ENT_SEQ_CO_PL_PO
@@ -815,8 +831,8 @@ class SIM(object):
         :return: A list of three numbers, the XYZ coordinates.
         """
         posi = self.graph.successors(vert, _GR_EDGE_TYPE.ENT)[0]
-        att_val_n = self.graph.successors(posi, _GR_XYZ_NODE)[0]
-        return self.graph.get_node_prop(att_val_n, 'value')
+        att_val_node = self.graph.successors(posi, _GR_XYZ_NODE)[0]
+        return self.graph.get_node_prop(att_val_node, 'value')
     # ----------------------------------------------------------------------------------------------
     def get_posi_coords(self, posi):
         """Get the XYZ coordinates of a position.
@@ -824,8 +840,8 @@ class SIM(object):
         :param posi: A position ID.
         :return: A list of three numbers, the XYZ coordinates.
         """
-        att_val_n = self.graph.successors(posi, _GR_XYZ_NODE)[0]
-        return self.graph.get_node_prop(att_val_n, 'value')
+        att_val_node = self.graph.successors(posi, _GR_XYZ_NODE)[0]
+        return self.graph.get_node_prop(att_val_node, 'value')
 # ----------------------------------------------------------------------------------------------
     def set_posi_coords(self, posi, xyz):
         """Set the XYZ coordinates of a position.
@@ -872,36 +888,36 @@ class SIM(object):
         :return: A list of entities.
         """
         #if attrib does not exist, throw error
-        att = self._graph_attrib_node_name(ent_type, att_name)
-        if not self.graph.has_node(att):
+        att_node = self._graph_attrib_node_name(ent_type, att_name)
+        if not self.graph.has_node(att_node):
             raise Exception("The attribute does not exist: '" + att_name + "'.")
         # val == None
         if comparator == '==' and att_val == None:
-            set_with_val = set(self.graph.get_nodes_with_out_edge(att))
+            set_with_val = set(self.graph.get_nodes_with_out_edge(att_node))
             set_all = set(self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META))
             return list(set_all - set_with_val)
         # val != None
         if comparator == '!=' and att_val == None:
-            return self.graph.get_nodes_with_out_edge(att)
+            return self.graph.get_nodes_with_out_edge(att_node)
         # val == att_val
         if comparator == '==':
-            att_val_n = self._graph_attrib_val_node_name(att_val, att)
-            if not self.graph.has_node(att_val_n):
+            att_val_node = self._graph_attrib_val_node_name(att_val, att_node)
+            if not self.graph.has_node(att_val_node):
                 return []
-            return self.graph.predecessors(att_val_n, att)
+            return self.graph.predecessors(att_val_node, att_node)
         # val != att_val
         if comparator == '!=':
-            att_val_n = self._graph_attrib_val_node_name(att_val, att)
-            if not self.graph.has_node(att_val_n):
+            att_val_node = self._graph_attrib_val_node_name(att_val, att_node)
+            if not self.graph.has_node(att_val_node):
                 return self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META)
-            ents_equal = self.graph.predecessors(att_val_n, att)
+            ents_equal = self.graph.predecessors(att_val_node, att_node)
             if len(ents_equal) == 0:
                 return self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META)
             set_equal = set(ents_equal)
             set_all = set(self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META))
             return list(set_all - set_equal)
         # other cases, data_type must be a number
-        data_type = self.graph.get_node_prop(att, 'data_type')
+        data_type = self.graph.get_node_prop(att_node, 'data_type')
         if data_type != DATA_TYPE.NUM:
             raise Exception("The '" + comparator +
                 "' comparator cannot be used with attributes of type '" + data_type + "'.")
@@ -910,28 +926,28 @@ class SIM(object):
         if comparator == '<':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                succs = self.graph.successors(ent, att)
+                succs = self.graph.successors(ent, att_node)
                 if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') < att_val:
                     result.append(ent)
         # val <= att_val
         if comparator == '<=':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                succs = self.graph.successors(ent, att)
+                succs = self.graph.successors(ent, att_node)
                 if len(succs) != 0 and self.graph.get_node_prop(succs[0],'value') <= att_val:
                     result.append(ent)
         # val > att_val
         if comparator == '>':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                succs = self.graph.successors(ent, att)
+                succs = self.graph.successors(ent, att_node)
                 if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') > att_val:
                     result.append(ent)
         # val >= att_val
         if comparator == '>=':
             result = []
             for ent in self.graph.successors(_GR_ENTS_NODE[ent_type], _GR_EDGE_TYPE.META):
-                succs = self.graph.successors(ent, att)
+                succs = self.graph.successors(ent, att_node)
                 if len(succs) != 0 and self.graph.get_node_prop(succs[0], 'value') >= att_val:
                     result.append(ent)
         # return list of entities
@@ -948,11 +964,13 @@ class SIM(object):
         # TODO create a dict for fast lookup
         return '_att_' + ent_type + '_' + att_name
     # ----------------------------------------------------------------------------------------------
-    def _graph_attrib_val_node_name(self, att_val, att):
+    def _graph_attrib_val_node_name(self, att_val, att_node):
         """Create the name for an attrib value node.
-        It will be something like this: '_val_[1,2,3]'.
+        If the attrib value is a number or string, then the value is returned.
+        Otherwise, the value is converted into a string.
+        For a list, it will be something like this: '[1,2,3]'.
         """
-        data_type = self.graph.get_node_prop(att, 'data_type')
+        data_type = self.graph.get_node_prop(att_node, 'data_type')
         if data_type == DATA_TYPE.NUM or data_type == DATA_TYPE.STR:
             return att_val
         return str(att_val)
@@ -982,40 +1000,40 @@ class SIM(object):
         """Add an attribute node to the graph.
         """
         # create the node name, from the entity type and attribute name
-        att = self._graph_attrib_node_name(ent_type, name)
+        att_node = self._graph_attrib_node_name(ent_type, name)
         # add the node to the graph
-        self.graph.add_node(att)
+        self.graph.add_node(att_node)
         # set node properties
-        self.graph.set_node_prop(att, 'ent_type', ent_type) # the `entity_type` for this attribute, `posi`, `vert`, etc
-        self.graph.set_node_prop(att, 'name', name) # the name of the attribute
-        self.graph.set_node_prop(att, 'data_type', data_type) # the data type of this attribute
+        self.graph.set_node_prop(att_node, 'ent_type', ent_type) # the `entity_type` for this attribute, `posi`, `vert`, etc
+        self.graph.set_node_prop(att_node, 'name', name) # the name of the attribute
+        self.graph.set_node_prop(att_node, 'data_type', data_type) # the data type of this attribute
         # create an edge from the node `ent_type_attribs` (e.g. posis_attribs) to the new attrib node
         # the edge type is `meta`
-        self.graph.add_edge(_GR_ATTRIBS_NODE[ent_type], att, _GR_EDGE_TYPE.META)
+        self.graph.add_edge(_GR_ATTRIBS_NODE[ent_type], att_node, _GR_EDGE_TYPE.META)
         # create a new edge type for this attrib
-        self.graph.add_edge_type(att, rev = True) # many to one
+        self.graph.add_edge_type(att_node, rev = True) # many to one
         # return the name of the new attrib node
-        return att
+        return att_node
     # ----------------------------------------------------------------------------------------------
-    def _graph_add_attrib_val(self, att_name, att_val):
+    def _graph_add_attrib_val(self, att_node, att_val):
         """
         Add an attribute value node to the graph.
 
-        :param att_name: the name of the attribute node
+        :param att_node: the name of the attribute node
         :param value: the value of the attribute
         """
         # get the name of the attribute value node
-        att_val_n = self._graph_attrib_val_node_name(att_val, att_name)
+        att_val_node = self._graph_attrib_val_node_name(att_val, att_node)
         # make sure that no node with the name already exists
-        if not self.graph.has_node(att_val_n):
+        if not self.graph.has_node(att_val_node):
             # add the attrib value node
             # the new node has 1 property
-            self.graph.add_node(att_val_n)
-            self.graph.set_node_prop(att_val_n, 'value', att_val) # the node value
+            self.graph.add_node(att_val_node)
+            self.graph.set_node_prop(att_val_node, 'value', att_val) # the node value
             # add an edge from the attrib value to the attrib
-            self.graph.add_edge(att_val_n, att_name, _GR_EDGE_TYPE.ATT) # att_val -> att
+            self.graph.add_edge(att_val_node, att_node, _GR_EDGE_TYPE.ATT) # att_val -> att
         # return the name of the attrib value node
-        return att_val_n
+        return att_val_node
     # ==============================================================================================
     # UTILITY 
     # ==============================================================================================

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+# from __future__ import unicode_literals
 from collections import OrderedDict
 import copy
 # ==================================================================================================
@@ -202,16 +202,17 @@ class Graph(object):
                     edges[Graph.FWD][node].pop(node1)
                 edges[Graph.REV][node1].clear()
             return
-        # None cases, del all edges which end start at node0
-        if node1 is None and node0 in edges[Graph.FWD]:
-            if rev:
-                for node in edges[Graph.FWD][node0]:
-                    edges[Graph.REV][node].pop(node0)
-            edges[Graph.FWD][node0].clear()
+        # None cases, del all edges which start at node0
+        if node1 is None:
+            if node0 in edges[Graph.FWD]:
+                if rev:
+                    for node in edges[Graph.FWD][node0]:
+                        edges[Graph.REV][node].pop(node0)
+                edges[Graph.FWD][node0].clear()
             return
         # error check
         if node0 not in self._nodes or node1 not in self._nodes:
-            raise Exception('Node does not exist: ' + node0 + ', ' + node1 + '.')
+            raise Exception('Node does not exist: ' + str(node0) + ', ' + str(node1) + '.')
         if (node0 == node1) :
             raise Exception('Nodes cannot be the same.')
         # check if edge_type has any edges
@@ -525,16 +526,18 @@ class Graph(object):
                     # fwd edges
                     for start, end in fr_edges_map[Graph.FWD].items():
                         info += '      FWD EDGE: ' + start + ' -> '
-                        if type(end) is set:
-                            info += '[' + str(list(end)) + ']\n'
+                        type_end = type(end)
+                        if type_end is set or type_end is OrderedDict:
+                            info += str(list(end)) + '\n'
                         else:
                             info += str(end) + '\n'
                     # rev edges
                     if self._edges_reversed[edge_type]:
                         for start, end in fr_edges_map[Graph.REV].items():
                             info += '      REV EDGE: '
-                            if type(end) is set:
-                                info += '[' + str(list(end)) + ']'
+                            type_end = type(end)
+                            if type_end is set or type_end is OrderedDict:
+                                info += str(list(end))
                             else:
                                 info += end
                             info += ' <- ' + start + '\n'
