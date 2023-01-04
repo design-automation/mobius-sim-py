@@ -24,3 +24,5 @@ coll = sm.add_coll()
 sm.add_coll_ent(coll, point)
 sm.add_coll_ent(coll, pline)
 sm.add_coll_ent(coll, pgon)
+
+print("Done!!!")
